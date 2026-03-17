@@ -1,0 +1,55 @@
+<div class="page-header">
+  <h1>Activités disponibles</h1>
+  <p class="subtitle">Découvrez les expériences uniques de nos voyages</p>
+</div>
+
+<div class="filter-bar">
+  <select [(ngModel)]="selectedVoyageId" (change)="filterByVoyage()">
+    <option [ngValue]="null">Tous les voyages</option>
+    <option *ngFor="let voyage of voyages" [ngValue]="voyage.id">
+      {{ voyage.nom }} - {{ voyage.destination }}
+    </option>
+  </select>
+</div>
+
+<div class="loading" *ngIf="loading">
+  Chargement des activités...
+</div>
+
+<div class="error" *ngIf="error">
+  {{ error }}
+</div>
+
+<div class="activites-grid" *ngIf="!loading && !error">
+  <div class="activite-card" *ngFor="let activite of filteredActivites">
+    <div class="activite-icon">🎯</div>
+
+    <div class="activite-content">
+      <div class="voyage-tag">
+        {{ getVoyageTitre(activite.voyageId) }}
+      </div>
+
+      <h3>{{ activite.nom }}</h3>
+      <p class="description">{{ activite.description }}</p>
+
+      <div class="activite-meta">
+        <div class="meta-item">
+          <span class="icon">⏱️</span>
+          <span>{{ activite.nombreReservations || 0 }} réservation(s)</span>
+        </div>
+        <div class="meta-item price">
+          <span class="icon">💰</span>
+          <span>{{ activite.prix }} MAD</span>
+        </div>
+      </div>
+
+      <a [routerLink]="['/client/voyages', activite.voyageId]" class="btn-view-voyage">
+        Voir le voyage
+      </a>
+    </div>
+  </div>
+
+  <div class="no-data" *ngIf="filteredActivites.length === 0">
+    Aucune activité trouvée pour ce voyage.
+  </div>
+</div>

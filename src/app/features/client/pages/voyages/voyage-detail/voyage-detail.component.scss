@@ -1,0 +1,271 @@
+.loading, .error {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+
+  .btn-back {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
+
+.voyage-hero {
+  position: relative;
+  height: 400px;
+  margin: -24px -24px 0;
+  overflow: hidden;
+  background: #f5f5f5;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 40px 32px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+
+    .btn-back-hero {
+      position: absolute;
+      top: -200px;
+      left: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 2.5rem;
+    }
+
+    .destination {
+      margin: 0;
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+  }
+}
+
+.voyage-content {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.info-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+
+  .icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .label {
+    display: block;
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .value {
+    display: block;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.description-section, .activites-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 0 0 16px 0;
+    color: #333;
+    font-size: 1.3rem;
+  }
+
+  p {
+    color: #666;
+    line-height: 1.7;
+    margin: 0;
+  }
+}
+
+.activites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activite-card {
+  border: 1px solid #eee;
+  padding: 20px;
+  border-radius: 8px;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .activite-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    h3 {
+      margin: 0;
+      color: #333;
+      font-size: 1.1rem;
+    }
+
+    .activite-price {
+      background: #27ae60;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  }
+
+  p {
+    color: #666;
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+  }
+
+  .activite-duration {
+    color: #999;
+    font-size: 0.85rem;
+  }
+}
+
+.booking-sidebar {
+  position: sticky;
+  top: 24px;
+}
+
+.booking-card {
+  background: white;
+  padding: 28px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+
+  .price {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #eee;
+
+    .amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #27ae60;
+    }
+
+    .currency {
+      font-size: 1.2rem;
+      color: #27ae60;
+    }
+
+    .per-person {
+      display: block;
+      color: #999;
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+  }
+
+  .booking-info {
+    margin-bottom: 24px;
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+      color: #666;
+    }
+  }
+
+  .btn-book {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #219a52;
+    }
+  }
+
+  .note {
+    text-align: center;
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 16px;
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .voyage-content {
+    grid-template-columns: 1fr;
+  }
+
+  .info-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .booking-sidebar {
+    position: static;
+  }
+}
