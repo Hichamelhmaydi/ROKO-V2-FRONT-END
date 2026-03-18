@@ -1,0 +1,51 @@
+<div class="page-header">
+  <h1>Gestion des Activités</h1>
+  <a routerLink="/admin/activites/nouveau" class="btn-add">+ Nouvelle Activité</a>
+</div>
+
+<div class="loading" *ngIf="loading">
+  Chargement...
+</div>
+
+<div class="error" *ngIf="error">
+  {{ error }}
+</div>
+
+<div class="table-container" *ngIf="!loading && !error">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Voyage</th>
+        <th>Réservations</th>
+        <th>Prix</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let activite of activites">
+        <td>
+          <div class="activite-name">
+            <strong>{{ activite.nom }}</strong>
+            <span class="description">{{ activite.description | slice:0:50 }}...</span>
+          </div>
+        </td>
+        <td>
+          <span class="voyage-badge">{{ getVoyageTitre(activite.voyageId) }}</span>
+        </td>
+        <td>{{ activite.nombreReservations || 0 }}</td>
+        <td class="price">{{ activite.prix }} MAD</td>
+        <td>
+          <div class="actions">
+            <a [routerLink]="['/admin/activites', activite.id, 'modifier']" class="btn-edit">Modifier</a>
+            <button (click)="deleteActivite(activite.id)" class="btn-delete">Supprimer</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="no-data" *ngIf="activites.length === 0">
+    Aucune activité trouvée. Créez votre première activité !
+  </div>
+</div>
