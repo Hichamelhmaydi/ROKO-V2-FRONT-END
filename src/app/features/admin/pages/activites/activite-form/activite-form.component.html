@@ -1,0 +1,68 @@
+<div class="page-header">
+  <h1>{{ isEdit ? 'Modifier l\'Activité' : 'Nouvelle Activité' }}</h1>
+  <a routerLink="/admin/activites" class="btn-back">Retour à la liste</a>
+</div>
+
+<div class="form-card">
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="voyageId">Voyage associé *</label>
+      <select
+        id="voyageId"
+        [(ngModel)]="activite.voyageId"
+        name="voyageId"
+        required>
+        <option [value]="0" disabled>Sélectionnez un voyage</option>
+        <option *ngFor="let voyage of voyages" [value]="voyage.id">
+          {{ voyage.nom }} - {{ voyage.destination }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="nom">Nom de l'activité *</label>
+      <input
+        type="text"
+        id="nom"
+        [(ngModel)]="activite.nom"
+        name="nom"
+        placeholder="Ex: Visite des souks"
+        required>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        [(ngModel)]="activite.description"
+        name="description"
+        rows="4"
+        placeholder="Décrivez l'activité..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="prix">Prix (MAD) *</label>
+        <input
+          type="number"
+          id="prix"
+          [(ngModel)]="activite.prix"
+          name="prix"
+          min="0"
+          step="0.01"
+          required>
+      </div>
+    </div>
+
+    <div class="error-message" *ngIf="error">
+      {{ error }}
+    </div>
+
+    <div class="form-actions">
+      <a routerLink="/admin/activites" class="btn-cancel">Annuler</a>
+      <button type="submit" [disabled]="loading" class="btn-submit">
+        {{ loading ? 'Enregistrement...' : (isEdit ? 'Modifier' : 'Créer') }}
+      </button>
+    </div>
+  </form>
+</div>
