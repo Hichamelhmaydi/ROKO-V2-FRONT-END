@@ -1,0 +1,172 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ReservationService } from '../../../../core/services/reservation.service';
+import { PageResponse } from '../../../../core/models/common.model';
+import { Reservation } from '../../../../core/models/reservation.model';
+
+@Component({
+  selector: 'app-admin-reservations',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <section class="page">
+      <div class="page-header">
+        <div>
+          <h1>Gestion des réservations</h1>
+          <p>Supervision des réservations, confirmations et clôtures.</p>
+        </div>
+
+        <div class="toolbar">
+          <select [(ngModel)]="selectedStatus" (change)="loadReservations()">
+            <option value="">Tous les statuts</option>
+            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+          </select>
+
+          <button type="button" (click)="loadReservations()">Actualiser</button>
+        </div>
+      </div>
+
+      <div class="state" *ngIf="loading">Chargement des réservations...</div>
+      <div class="state error" *ngIf="!loading && error">{{ error }}</div>
+
+      <div class="table-card" *ngIf="!loading && !error">
+        <table *ngIf="reservations.length; else emptyState">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Voyage</th>
+              <th>Voyageur</th>
+              <th>Personnes</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th>Paiement</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let reservation of reservations">
+              <td>#{{ reservation.id }}</td>
+              <td>
+                <strong>{{ reservation.voyageNom }}</strong>
+                <div>{{ reservation.voyageDestination }}</div>
+              </td>
+              <td>
+                {{ reservation.userPrenom }} {{ reservation.userNom }}
+                <div>{{ reservation.userEmail }}</div>
+              </td>
+              <td>{{ reservation.nombrePersonnes }}</td>
+              <td>{{ reservation.montantTotal || reservation.prixBase || 0 }} EUR</td>
+              <td><span class="badge">{{ reservation.statut }}</span></td>
+              <td>{{ reservation.paiementEffectue ? 'Payé' : 'En attente' }}</td>
+              <td>
+                <div class="actions">
+                  <button type="button" *ngIf="reservation.statut === 'EN_ATTENTE' || reservation.statut === 'CREE'" (click)="confirmer(reservation)">Confirmer</button>
+                  <button type="button" *ngIf="reservation.statut === 'CONFIRMEE' || reservation.statut === 'PAYEE'" (click)="completer(reservation)">Compléter</button>
+                  <button type="button" *ngIf="reservation.statut !== 'ANNULEE' && reservation.statut !== 'COMPLETEE'" (click)="annuler(reservation)">Annuler</button>
+                  <button type="button" class="danger" (click)="supprimer(reservation)">Supprimer</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #emptyState>
+          <div class="empty">Aucune réservation à afficher.</div>
+        </ng-template>
+
+        <div class="pagination" *ngIf="!selectedStatus && totalPages > 1">
+          <button type="button" [disabled]="page === 0" (click)="changePage(page - 1)">Précédent</button>
+          <span>Page {{ page + 1 }} / {{ totalPages }}</span>
+          <button type="button" [disabled]="page + 1 >= totalPages" (click)="changePage(page + 1)">Suivant</button>
+        </div>
+      </div>
+    </section>
+  `,
+  styles: [`
+    .page { display: grid; gap: 1rem; }
+    .page-header, .toolbar, .actions, .pagination { display: flex; gap: 0.75rem; align-items: center; }
+    .page-header { justify-content: space-between; flex-wrap: wrap; }
+    .table-card { background: #fff; border-radius: 16px; padding: 1rem; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); overflow: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.85rem; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    .badge { display: inline-block; padding: 0.3rem 0.6rem; border-radius: 999px; background: #e0f2fe; color: #075985; font-weight: 600; }
+    .actions { flex-wrap: wrap; }
+    button, select { border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.55rem 0.85rem; background: #fff; }
+    button.danger { color: #b91c1c; }
+    .state, .empty { background: #fff; padding: 1rem; border-radius: 14px; }
+    .state.error { color: #b91c1c; }
+  `]
+})
+export class AdminReservationsComponent implements OnInit {
+  reservations: Reservation[] = [];
+  loading = true;
+  error = '';
+  page = 0;
+  totalPages = 0;
+  readonly statuses = ['CREE', 'EN_ATTENTE', 'EN_ATTENTE_PAIEMENT', 'CONFIRMEE', 'PAYEE', 'COMPLETEE', 'ANNULEE', 'ECHEC'];
+  selectedStatus = '';
+
+  constructor(private reservationService: ReservationService) {}
+
+  ngOnInit(): void {
+    this.loadReservations();
+  }
+
+  loadReservations(): void {
+    this.loading = true;
+    this.error = '';
+
+    if (this.selectedStatus) {
+      this.reservationService.getByStatut(this.selectedStatus).subscribe({
+        next: (reservations: Reservation[]) => {
+          this.reservations = reservations;
+          this.totalPages = 1;
+          this.loading = false;
+        },
+        error: (err: any) => {
+          this.error = err.error?.message || 'Impossible de charger les réservations';
+          this.loading = false;
+        }
+      });
+      return;
+    }
+
+    this.reservationService.getAll(this.page, 10).subscribe({
+      next: (pageResponse: PageResponse<Reservation>) => {
+          this.reservations = pageResponse.content;
+          this.totalPages = pageResponse.totalPages;
+        this.loading = false;
+      },
+      error: (err: any) => {
+        this.error = err.error?.message || 'Impossible de charger les réservations';
+        this.loading = false;
+      }
+    });
+  }
+
+  changePage(page: number): void {
+    this.page = page;
+    this.loadReservations();
+  }
+
+  confirmer(reservation: Reservation): void {
+    this.reservationService.confirmer(reservation.id).subscribe({ next: () => this.loadReservations() });
+  }
+
+  completer(reservation: Reservation): void {
+    this.reservationService.completer(reservation.id).subscribe({ next: () => this.loadReservations() });
+  }
+
+  annuler(reservation: Reservation): void {
+    const motif = prompt('Motif d\'annulation', reservation.motifAnnulation || '') ?? '';
+    this.reservationService.annuler(reservation.id, motif).subscribe({ next: () => this.loadReservations() });
+  }
+
+  supprimer(reservation: Reservation): void {
+    if (!confirm(`Supprimer la réservation #${reservation.id} ?`)) {
+      return;
+    }
+    this.reservationService.delete(reservation.id).subscribe({ next: () => this.loadReservations() });
+  }
+}
