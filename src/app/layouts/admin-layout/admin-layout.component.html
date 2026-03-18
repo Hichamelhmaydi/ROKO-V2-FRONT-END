@@ -1,0 +1,32 @@
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>ROKO</h1>
+      <span class="badge">Admin</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of menuItems; track item.route) {
+        <a [routerLink]="item.route"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="label">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <span class="user-name">{{ authService.getCurrentUser()?.prenom }} {{ authService.getCurrentUser()?.nom }}</span>
+        <span class="user-email">{{ authService.getCurrentUser()?.email }}</span>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        Déconnexion
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
