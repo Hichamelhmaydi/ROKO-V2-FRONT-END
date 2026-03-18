@@ -1,0 +1,55 @@
+<div class="page-header">
+  <h1>Gestion des Voyages</h1>
+  <a routerLink="/admin/voyages/nouveau" class="btn-add">+ Nouveau Voyage</a>
+</div>
+
+<div class="loading" *ngIf="loading">
+  Chargement...
+</div>
+
+<div class="error" *ngIf="error">
+  {{ error }}
+</div>
+
+<div class="voyages-grid" *ngIf="!loading && !error">
+  <div class="voyage-card" *ngFor="let voyage of voyages">
+    <div class="voyage-image">
+      <img [src]="voyage.cover || 'assets/default-voyage.jpg'" [alt]="voyage.nom">
+      <span class="status-badge" [class.active]="voyage.statut === 'DISPONIBLE'">
+        {{ voyage.statut }}
+      </span>
+    </div>
+
+    <div class="voyage-content">
+      <h3>{{ voyage.nom }}</h3>
+      <p class="destination">{{ voyage.destination }}</p>
+
+      <div class="voyage-details">
+        <div class="detail">
+          <span class="label">Départ</span>
+          <span class="value">{{ voyage.dateDepart | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail">
+          <span class="label">Retour</span>
+          <span class="value">{{ voyage.dateRetour | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail">
+          <span class="label">Prix</span>
+          <span class="value price">{{ voyage.prixBase }} MAD</span>
+        </div>
+      </div>
+
+      <div class="voyage-actions">
+        <a [routerLink]="['/admin/voyages', voyage.id, 'modifier']" class="btn-edit">Modifier</a>
+        <button (click)="toggleStatut(voyage)" class="btn-toggle">
+          Changer statut
+        </button>
+        <button (click)="deleteVoyage(voyage.id)" class="btn-delete">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-data" *ngIf="voyages.length === 0">
+    Aucun voyage trouvé. Créez votre premier voyage !
+  </div>
+</div>
