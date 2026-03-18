@@ -1,0 +1,89 @@
+<div class="register-container">
+  <div class="register-card">
+    <h1>ROKO</h1>
+    <h2>Inscription</h2>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prenom">Prénom *</label>
+          <input
+            type="text"
+            id="prenom"
+            [(ngModel)]="prenom"
+            name="prenom"
+            placeholder="Votre prénom"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="nom">Nom *</label>
+          <input
+            type="text"
+            id="nom"
+            [(ngModel)]="nom"
+            name="nom"
+            placeholder="Votre nom"
+            required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="votre@email.com"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="telephone">Téléphone *</label>
+        <input
+          type="tel"
+          id="telephone"
+          [(ngModel)]="telephone"
+          name="telephone"
+          placeholder="+212 6XX XXX XXX"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe *</label>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="••••••••"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer le mot de passe *</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          placeholder="••••••••"
+          required>
+      </div>
+
+      <div class="error-message" *ngIf="error">
+        {{ error }}
+      </div>
+
+      <button type="submit" [disabled]="loading" class="btn-primary">
+        <span *ngIf="!loading">S'inscrire</span>
+        <span *ngIf="loading">Inscription...</span>
+      </button>
+    </form>
+
+    <p class="login-link">
+      Déjà un compte ? <a routerLink="/login">Se connecter</a>
+    </p>
+  </div>
+</div>
