@@ -17,6 +17,29 @@
     </div>
   </div>
 
+  <!-- Carrousel des photos du voyage -->
+  <div class="photos-carousel" *ngIf="photos.length > 0">
+    <div class="carousel-container">
+      <button class="carousel-btn prev" (click)="prevPhoto()" *ngIf="photos.length > 1">&#8249;</button>
+      <div class="carousel-track">
+        <img
+          [src]="photos[currentPhotoIndex]"
+          [alt]="voyage.nom + ' - photo ' + (currentPhotoIndex + 1)"
+          class="carousel-image">
+      </div>
+      <button class="carousel-btn next" (click)="nextPhoto()" *ngIf="photos.length > 1">&#8250;</button>
+    </div>
+    <div class="carousel-dots" *ngIf="photos.length > 1">
+      <span
+        *ngFor="let photo of photos; let i = index"
+        class="dot"
+        [class.active]="i === currentPhotoIndex"
+        (click)="setPhoto(i)">
+      </span>
+    </div>
+    <p class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ photos.length }}</p>
+  </div>
+
   <div class="voyage-content">
     <div class="main-info">
       <div class="info-cards">
@@ -42,6 +65,11 @@
         <p>{{ voyage.description }}</p>
       </div>
 
+      <div class="itineraire-section" *ngIf="voyage.itineraire">
+        <h2>Itinéraire</h2>
+        <p>{{ voyage.itineraire }}</p>
+      </div>
+
       <div class="activites-section" *ngIf="activites.length > 0">
         <h2>Activités incluses</h2>
         <div class="activites-list">
@@ -51,7 +79,7 @@
               <span class="activite-price">{{ activite.prix }} MAD</span>
             </div>
             <p>{{ activite.description }}</p>
-            <span class="activite-duration">Durée: {{ activite.duree }} min</span>
+            <span class="activite-duration" *ngIf="activite.duree">Durée: {{ activite.duree }} min</span>
           </div>
         </div>
       </div>

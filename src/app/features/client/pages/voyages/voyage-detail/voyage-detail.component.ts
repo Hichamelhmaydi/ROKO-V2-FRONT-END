@@ -17,6 +17,7 @@ export class VoyageDetailComponent implements OnInit {
   activites: Activite[] = [];
   loading = true;
   error = '';
+  currentPhotoIndex = 0;
 
   constructor(
     private voyageService: VoyageService,
@@ -38,6 +39,7 @@ export class VoyageDetailComponent implements OnInit {
     this.voyageService.getById(id).subscribe({
       next: (voyage) => {
         this.voyage = voyage;
+        this.currentPhotoIndex = 0;
         this.loadActivites(id);
       },
       error: (err) => {
@@ -66,6 +68,26 @@ export class VoyageDetailComponent implements OnInit {
     const start = new Date(this.voyage.dateDepart);
     const end = new Date(this.voyage.dateRetour);
     return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  get photos(): string[] {
+    return this.voyage?.photos || [];
+  }
+
+  nextPhoto(): void {
+    if (this.photos.length > 0) {
+      this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.photos.length;
+    }
+  }
+
+  prevPhoto(): void {
+    if (this.photos.length > 0) {
+      this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.photos.length) % this.photos.length;
+    }
+  }
+
+  setPhoto(index: number): void {
+    this.currentPhotoIndex = index;
   }
 
   goBack(): void {

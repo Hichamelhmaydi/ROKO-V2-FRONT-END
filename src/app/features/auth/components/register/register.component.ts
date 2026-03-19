@@ -18,8 +18,15 @@ export class RegisterComponent {
   password = '';
   confirmPassword = '';
   telephone = '';
+  idNational = '';
+  dateExpiration = '';
   error = '';
   loading = false;
+  readonly minDateExpiration: string = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  })();
 
   constructor(
     private authService: AuthService,
@@ -27,7 +34,7 @@ export class RegisterComponent {
   ) {}
 
   onSubmit(): void {
-    if (!this.nom || !this.prenom || !this.email || !this.password || !this.telephone) {
+    if (!this.nom || !this.prenom || !this.email || !this.password || !this.telephone || !this.idNational || !this.dateExpiration) {
       this.error = 'Veuillez remplir tous les champs obligatoires';
       return;
     }
@@ -42,6 +49,15 @@ export class RegisterComponent {
       return;
     }
 
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const expDate = new Date(this.dateExpiration);
+      if (isNaN(expDate.getTime()) || expDate <= today) {
+        this.error = "La date d'expiration de la pièce d'identité doit être dans le futur";
+        return;
+      }
+
     this.loading = true;
     this.error = '';
 
@@ -50,7 +66,9 @@ export class RegisterComponent {
       prenom: this.prenom,
       email: this.email,
       password: this.password,
-      telephone: this.telephone
+      telephone: this.telephone,
+      idNational: this.idNational,
+      dateExpiration: this.dateExpiration
     }).subscribe({
       next: () => {
         this.router.navigate(['/client']);

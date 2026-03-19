@@ -72,6 +72,29 @@
           required>
       </div>
 
+      <div class="form-row">
+        <div class="form-group">
+          <label for="idNational">N° CIN / Passeport *</label>
+          <input
+            type="text"
+            id="idNational"
+            [(ngModel)]="idNational"
+            name="idNational"
+            placeholder="Ex: AB123456"
+            required>
+        </div>
+        <div class="form-group">
+          <label for="dateExpiration">Date d'expiration CIN *</label>
+          <input
+            type="date"
+            id="dateExpiration"
+            [(ngModel)]="dateExpiration"
+            name="dateExpiration"
+            [min]="minDateExpiration"
+            required>
+        </div>
+      </div>
+
       <div class="error-message" *ngIf="error">
         {{ error }}
       </div>

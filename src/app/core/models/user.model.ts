@@ -21,6 +21,8 @@ export interface RegisterRequest {
   nom: string;
   prenom: string;
   telephone: string;
+  idNational?: string;
+  dateExpiration?: string;
 }
 
 export interface AuthResponse {
