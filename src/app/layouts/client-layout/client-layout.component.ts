@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './client-layout.component.scss'
 })
 export class ClientLayoutComponent {
-  menuItems = [
+  private menuItems = [
     { label: 'Voyages', route: '/client/voyages' },
     { label: 'Activités', route: '/client/activites' },
     { label: 'Mes Réservations', route: '/client/reservations' },
@@ -23,6 +23,25 @@ export class ClientLayoutComponent {
     public authService: AuthService,
     private router: Router
   ) {}
+
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  get visibleMenuItems() {
+    if (!this.isLoggedIn) {
+      return this.menuItems.filter(item => item.route === '/client/voyages');
+    }
+    return this.menuItems;
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
+  goToRegister(): void {
+    this.router.navigate(['/register']);
+  }
 
   logout(): void {
     this.authService.logout();

@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard, adminGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/client/voyages', pathMatch: 'full' },
 
   {
     path: 'login',
@@ -93,7 +93,6 @@ export const routes: Routes = [
     path: 'client',
     loadComponent: () => import('./layouts/client-layout/client-layout.component')
       .then(m => m.ClientLayoutComponent),
-    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'voyages', pathMatch: 'full' },
       {
@@ -108,26 +107,30 @@ export const routes: Routes = [
       },
       {
         path: 'activites',
+        canActivate: [authGuard],
         loadComponent: () => import('./features/client/pages/activites/activite-list/activite-list.component')
           .then(m => m.ClientActiviteListComponent)
       },
       {
         path: 'reservations',
+        canActivate: [authGuard],
         loadComponent: () => import('./features/client/pages/reservations/reservations.component')
           .then(m => m.ClientReservationsComponent)
       },
       {
         path: 'paiements',
+        canActivate: [authGuard],
         loadComponent: () => import('./features/client/pages/paiements/paiements.component')
           .then(m => m.ClientPaiementsComponent)
       },
       {
         path: 'profil',
+        canActivate: [authGuard],
         loadComponent: () => import('./features/client/pages/profil/profil.component')
           .then(m => m.ClientProfilComponent)
       }
     ]
   },
 
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/client/voyages' }
 ];

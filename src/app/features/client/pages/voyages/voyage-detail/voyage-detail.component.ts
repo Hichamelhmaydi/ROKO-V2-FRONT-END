@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VoyageService } from '../../../../../core/services/voyage.service';
 import { ActiviteService } from '../../../../../core/services/activite.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 import { Voyage, Activite } from '../../../../../core/models/voyage.model';
 
 @Component({
@@ -22,6 +23,7 @@ export class VoyageDetailComponent implements OnInit {
   constructor(
     private voyageService: VoyageService,
     private activiteService: ActiviteService,
+    public authService: AuthService,
     private route: ActivatedRoute,
     private router: Router
   ) {}

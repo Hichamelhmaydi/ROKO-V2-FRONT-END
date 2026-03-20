@@ -93,8 +93,15 @@
           <span class="per-person">/ personne</span>
         </div>
 
-        <a [routerLink]="['/client/reservations']" [queryParams]="{ voyageId: voyage.id }" class="btn-book">
+        <a *ngIf="authService.isLoggedIn()"
+           [routerLink]="['/client/reservations']"
+           [queryParams]="{ voyageId: voyage.id }"
+           class="btn-book">
           Réserver maintenant
+        </a>
+
+        <a *ngIf="!authService.isLoggedIn()" [routerLink]="['/login']" class="btn-book">
+          Connectez-vous pour réserver
         </a>
 
         <p class="note">
