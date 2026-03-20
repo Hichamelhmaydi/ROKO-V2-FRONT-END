@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ActiviteVoyageService } from '../../../../core/services/activite-voyage.service';
 import { ReservationService } from '../../../../core/services/reservation.service';
 import { VoyageService } from '../../../../core/services/voyage.service';
@@ -46,6 +47,17 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
           <textarea rows="3" [(ngModel)]="form.commentaire" name="commentaire" placeholder="Précisions utiles pour cette réservation"></textarea>
         </label>
 
+        <div class="options" *ngIf="activitesObligatoires.length">
+          <h3>Activités obligatoires</h3>
+          <label class="option-item required" *ngFor="let activite of activitesObligatoires">
+            <input type="checkbox" [checked]="true" disabled>
+            <span>
+              <strong>{{ activite.activiteNom }}</strong>
+              <small>{{ getActivityPrice(activite) }} EUR</small>
+            </span>
+          </label>
+        </div>
+
         <div class="options" *ngIf="activitesOptionnelles.length">
           <h3>Activités optionnelles</h3>
           <label class="option-item" *ngFor="let activite of activitesOptionnelles">
@@ -55,9 +67,17 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
               (change)="toggleActivite(activite.activiteId, $any($event.target).checked)">
             <span>
               <strong>{{ activite.activiteNom }}</strong>
-              <small>{{ activite.prix || 0 }} EUR</small>
+              <small>{{ getActivityPrice(activite) }} EUR</small>
             </span>
           </label>
+        </div>
+
+        <div class="options" *ngIf="form.voyageId">
+          <h3>Total estimé</h3>
+          <p>Base voyage: {{ getSelectedVoyageBasePrice() }} EUR</p>
+          <p>Options choisies: {{ getSelectedOptionalTotal() }} EUR</p>
+          <p><strong>Total / personne: {{ getEstimatedTotalPerPerson() }} EUR</strong></p>
+          <p><strong>Total global: {{ getEstimatedGrandTotal() }} EUR</strong></p>
         </div>
 
         <div class="error" *ngIf="formError">{{ formError }}</div>
@@ -106,6 +126,7 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
     .link-btn { text-decoration: none; color: #0f172a; }
     .options { display: grid; gap: 0.5rem; }
     .option-item { display: flex; gap: 0.75rem; align-items: center; font-weight: 400; }
+    .option-item.required { opacity: 0.95; }
     .badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 0.3rem 0.65rem; border-radius: 999px; font-weight: 700; }
     .meta { display: grid; gap: 0.35rem; color: #475569; }
     .error { color: #b91c1c; }
@@ -114,6 +135,7 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
 export class ClientReservationsComponent implements OnInit {
   voyages: Voyage[] = [];
   reservations: Reservation[] = [];
+  activitesObligatoires: ActiviteVoyage[] = [];
   activitesOptionnelles: ActiviteVoyage[] = [];
   loading = true;
   error = '';
@@ -172,17 +194,23 @@ export class ClientReservationsComponent implements OnInit {
 
   onVoyageChange(): void {
     if (!this.form.voyageId) {
+      this.activitesObligatoires = [];
       this.activitesOptionnelles = [];
       this.form.activitesOptionnellesIds = [];
       return;
     }
 
-    this.activiteVoyageService.getOptionnelles(this.form.voyageId).subscribe({
-      next: (activites) => {
-        this.activitesOptionnelles = activites;
+    forkJoin({
+      obligatoires: this.activiteVoyageService.getObligatoires(this.form.voyageId),
+      optionnelles: this.activiteVoyageService.getOptionnelles(this.form.voyageId)
+    }).subscribe({
+      next: ({ obligatoires, optionnelles }) => {
+        this.activitesObligatoires = obligatoires;
+        this.activitesOptionnelles = optionnelles;
         this.form.activitesOptionnellesIds = [];
       },
       error: () => {
+        this.activitesObligatoires = [];
         this.activitesOptionnelles = [];
       }
     });
@@ -216,6 +244,7 @@ export class ClientReservationsComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.form = { voyageId: 0, nombrePersonnes: 1, commentaire: '', activitesOptionnellesIds: [] };
+        this.activitesObligatoires = [];
         this.activitesOptionnelles = [];
         this.router.navigate([], { queryParams: { voyageId: null }, queryParamsHandling: 'merge' });
         this.loadReservations();
@@ -225,6 +254,31 @@ export class ClientReservationsComponent implements OnInit {
         this.formError = err.error?.message || 'Impossible de créer la réservation';
       }
     });
+  }
+
+  getActivityPrice(activite: ActiviteVoyage): number {
+    return Number(activite.prix ?? 0);
+  }
+
+  getSelectedVoyageBasePrice(): number {
+    const selectedVoyage = this.voyages.find(v => v.id === this.form.voyageId);
+    return Number(selectedVoyage?.prixBase ?? 0);
+  }
+
+  getSelectedOptionalTotal(): number {
+    const selectedIds = new Set(this.form.activitesOptionnellesIds || []);
+    return this.activitesOptionnelles
+      .filter(a => selectedIds.has(a.activiteId))
+      .reduce((sum, a) => sum + this.getActivityPrice(a), 0);
+  }
+
+  getEstimatedTotalPerPerson(): number {
+    return this.getSelectedVoyageBasePrice() + this.getSelectedOptionalTotal();
+  }
+
+  getEstimatedGrandTotal(): number {
+    const qty = this.form.nombrePersonnes && this.form.nombrePersonnes > 0 ? this.form.nombrePersonnes : 1;
+    return this.getEstimatedTotalPerPerson() * qty;
   }
 
   cancelReservation(reservation: Reservation): void {

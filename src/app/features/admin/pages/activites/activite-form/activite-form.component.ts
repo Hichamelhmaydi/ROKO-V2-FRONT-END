@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ActiviteService } from '../../../../../core/services/activite.service';
+import { ActiviteVoyageService } from '../../../../../core/services/activite-voyage.service';
 import { VoyageService } from '../../../../../core/services/voyage.service';
-import { ActiviteRequest, Voyage } from '../../../../../core/models/voyage.model';
+import { ActiviteRequest, ActiviteVoyage, Voyage } from '../../../../../core/models/voyage.model';
 
 @Component({
   selector: 'app-activite-form',
@@ -19,6 +20,7 @@ export class ActiviteFormComponent implements OnInit {
   loading = false;
   error = '';
   voyages: Voyage[] = [];
+  obligatoire = false;
 
   activite: ActiviteRequest = {
     nom: '',
@@ -29,6 +31,7 @@ export class ActiviteFormComponent implements OnInit {
 
   constructor(
     private activiteService: ActiviteService,
+    private activiteVoyageService: ActiviteVoyageService,
     private voyageService: VoyageService,
     private route: ActivatedRoute,
     private router: Router
@@ -67,6 +70,7 @@ export class ActiviteFormComponent implements OnInit {
           prix: activite.prix,
           voyageId: activite.voyageId
         };
+        this.loadPivotConfig(activite.id, activite.voyageId);
       },
       error: (err) => {
         this.error = 'Erreur lors du chargement de l\'activité';
@@ -86,13 +90,61 @@ export class ActiviteFormComponent implements OnInit {
       : this.activiteService.create(this.activite);
 
     operation.subscribe({
-      next: () => {
-        this.router.navigate(['/admin/activites']);
+      next: (saved) => {
+        this.syncPivotConfig(saved.id, this.activite.voyageId);
       },
       error: (err) => {
         this.loading = false;
         this.error = err.error?.message || 'Erreur lors de l\'enregistrement';
         console.error(err);
+      }
+    });
+  }
+
+  private loadPivotConfig(activiteId: number, voyageId: number): void {
+    this.activiteVoyageService.getByActivite(activiteId).subscribe({
+      next: (associations) => {
+        const association = associations.find(a => a.voyageId === voyageId);
+        this.obligatoire = !!association?.obligatoire;
+      },
+      error: () => {
+        this.obligatoire = false;
+      }
+    });
+  }
+
+  private syncPivotConfig(activiteId: number, voyageId: number): void {
+    this.activiteVoyageService.getByActivite(activiteId).subscribe({
+      next: (associations) => {
+        const association = associations.find(a => a.voyageId === voyageId);
+
+        const payload: ActiviteVoyage = {
+          id: association?.id ?? 0,
+          activiteId,
+          voyageId,
+          prix: this.activite.prix,
+          obligatoire: this.obligatoire,
+          disponible: true
+        };
+
+        const request$ = association?.id
+          ? this.activiteVoyageService.update(association.id, payload)
+          : this.activiteVoyageService.create(payload);
+
+        request$.subscribe({
+          next: () => {
+            this.loading = false;
+            this.router.navigate(['/admin/activites']);
+          },
+          error: (err) => {
+            this.loading = false;
+            this.error = err.error?.message || 'Erreur lors de la configuration activité/voyage';
+          }
+        });
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err.error?.message || 'Erreur lors du chargement des associations activité/voyage';
       }
     });
   }
