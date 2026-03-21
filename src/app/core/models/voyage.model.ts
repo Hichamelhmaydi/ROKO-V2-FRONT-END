@@ -5,6 +5,7 @@ export interface Voyage {
   destination: string;
   dateDepart: string;
   dateRetour: string;
+  prixInitial: number;
   prixBase: number;
   cover?: string;
   statut: string;

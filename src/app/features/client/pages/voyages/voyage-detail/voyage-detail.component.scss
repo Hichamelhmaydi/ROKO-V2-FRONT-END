@@ -287,6 +287,33 @@
     padding-bottom: 24px;
     border-bottom: 1px solid #eee;
 
+    .label-prix {
+      display: block;
+      font-size: 0.8rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .price-initial {
+      margin-bottom: 8px;
+
+      .amount-initial {
+        font-size: 1.4rem;
+        font-weight: 500;
+        color: #bbb;
+        text-decoration: line-through;
+      }
+    }
+
+    .price-total {
+      background: #f0faf4;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 4px;
+    }
+
     .amount {
       font-size: 2.5rem;
       font-weight: 700;

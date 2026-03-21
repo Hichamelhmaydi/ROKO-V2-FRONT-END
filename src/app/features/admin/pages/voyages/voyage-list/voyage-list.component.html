@@ -34,8 +34,12 @@
           <span class="value">{{ voyage.dateRetour | date:'dd/MM/yyyy' }}</span>
         </div>
         <div class="detail">
-          <span class="label">Prix</span>
-          <span class="value price">{{ voyage.prixBase }} MAD</span>
+          <span class="label">Prix initial</span>
+          <span class="value price">{{ voyage.prixInitial }} MAD</span>
+        </div>
+        <div class="detail" *ngIf="voyage.prixBase !== voyage.prixInitial">
+          <span class="label">Prix total (avec obligatoires)</span>
+          <span class="value price highlight">{{ voyage.prixBase }} MAD</span>
         </div>
       </div>
 

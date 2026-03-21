@@ -88,8 +88,15 @@
     <div class="booking-sidebar">
       <div class="booking-card">
         <div class="price">
-          <span class="amount">{{ voyage.prixBase }}</span>
-          <span class="currency">MAD</span>
+          <div *ngIf="voyage.prixInitial !== voyage.prixBase" class="price-initial">
+            <span class="label-prix">Prix de base</span>
+            <span class="amount-initial">{{ voyage.prixInitial }} MAD</span>
+          </div>
+          <div [class.price-total]="voyage.prixInitial !== voyage.prixBase">
+            <span class="label-prix" *ngIf="voyage.prixInitial !== voyage.prixBase">Prix avec activités obligatoires</span>
+            <span class="amount">{{ voyage.prixBase }}</span>
+            <span class="currency">MAD</span>
+          </div>
           <span class="per-person">/ personne</span>
         </div>
 

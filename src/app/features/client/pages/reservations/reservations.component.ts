@@ -74,7 +74,8 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
 
         <div class="options" *ngIf="form.voyageId">
           <h3>Total estimé</h3>
-          <p>Base voyage: {{ getSelectedVoyageBasePrice() }} EUR</p>
+          <p>Base voyage: {{ getSelectedVoyageInitialPrice() }} EUR</p>
+          <p>Activités obligatoires: {{ getSelectedMandatoryTotal() }} EUR</p>
           <p>Options choisies: {{ getSelectedOptionalTotal() }} EUR</p>
           <p><strong>Total / personne: {{ getEstimatedTotalPerPerson() }} EUR</strong></p>
           <p><strong>Total global: {{ getEstimatedGrandTotal() }} EUR</strong></p>
@@ -260,9 +261,13 @@ export class ClientReservationsComponent implements OnInit {
     return Number(activite.prix ?? 0);
   }
 
-  getSelectedVoyageBasePrice(): number {
+  getSelectedVoyageInitialPrice(): number {
     const selectedVoyage = this.voyages.find(v => v.id === this.form.voyageId);
-    return Number(selectedVoyage?.prixBase ?? 0);
+    return Number(selectedVoyage?.prixInitial ?? selectedVoyage?.prixBase ?? 0);
+  }
+
+  getSelectedMandatoryTotal(): number {
+    return this.activitesObligatoires.reduce((sum, a) => sum + this.getActivityPrice(a), 0);
   }
 
   getSelectedOptionalTotal(): number {
@@ -273,7 +278,19 @@ export class ClientReservationsComponent implements OnInit {
   }
 
   getEstimatedTotalPerPerson(): number {
-    return this.getSelectedVoyageBasePrice() + this.getSelectedOptionalTotal();
+    const selectedVoyage = this.voyages.find(v => v.id === this.form.voyageId);
+    if (!selectedVoyage) {
+      return this.getSelectedOptionalTotal();
+    }
+
+    const prixBaseStocke = Number(selectedVoyage.prixBase ?? 0);
+    const prixInitial = Number(selectedVoyage.prixInitial ?? prixBaseStocke);
+    const obligatoire = this.getSelectedMandatoryTotal();
+    const totalCalcule = prixInitial + obligatoire;
+
+    // Utiliser la valeur la plus fiable pour éviter les incohérences temporaires entre front/back.
+    const baseFinale = Math.max(prixBaseStocke, totalCalcule);
+    return baseFinale + this.getSelectedOptionalTotal();
   }
 
   getEstimatedGrandTotal(): number {

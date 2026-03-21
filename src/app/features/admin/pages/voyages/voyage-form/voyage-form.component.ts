@@ -61,7 +61,7 @@ export class VoyageFormComponent implements OnInit {
           destination: voyage.destination,
           dateDepart: voyage.dateDepart.split('T')[0],
           dateRetour: voyage.dateRetour.split('T')[0],
-          prixBase: voyage.prixBase,
+          prixBase: voyage.prixInitial ?? voyage.prixBase,
           cover: voyage.cover || ''
         };
         if (voyage.cover) {
