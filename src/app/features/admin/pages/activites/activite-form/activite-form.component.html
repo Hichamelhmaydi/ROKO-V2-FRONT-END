@@ -12,9 +12,9 @@
         [(ngModel)]="activite.voyageId"
         name="voyageId"
         required>
-        <option [value]="0" disabled>Sélectionnez un voyage</option>
+        <option [ngValue]="0" disabled>Sélectionnez un voyage</option>
         @for (voyage of voyages; track voyage) {
-          <option [value]="voyage.id">
+          <option [ngValue]="voyage.id">
             {{ voyage.nom }} - {{ voyage.destination }}
           </option>
         }

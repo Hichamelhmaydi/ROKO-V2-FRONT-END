@@ -114,14 +114,16 @@ export class ActiviteFormComponent implements OnInit {
   }
 
   private syncPivotConfig(activiteId: number, voyageId: number): void {
+    const normalizedVoyageId = Number(voyageId);
+
     this.activiteVoyageService.getByActivite(activiteId).subscribe({
       next: (associations) => {
-        const association = associations.find(a => a.voyageId === voyageId);
+        const association = associations.find(a => Number(a.voyageId) === normalizedVoyageId);
 
         const payload: ActiviteVoyage = {
           id: association?.id ?? 0,
           activiteId,
-          voyageId,
+          voyageId: normalizedVoyageId,
           prix: this.activite.prix,
           obligatoire: this.obligatoire,
           disponible: true
@@ -137,6 +139,12 @@ export class ActiviteFormComponent implements OnInit {
             this.router.navigate(['/admin/activites']);
           },
           error: (err) => {
+            const message = (err?.error?.message || '').toString().toLowerCase();
+            if (message.includes('deja associee') || message.includes('déjà associée')) {
+              this.loading = false;
+              this.router.navigate(['/admin/activites']);
+              return;
+            }
             this.loading = false;
             this.error = err.error?.message || 'Erreur lors de la configuration activité/voyage';
           }
