@@ -17,25 +17,31 @@ import { AdminDashboard } from '../../../../core/models/dashboard.model';
         </div>
         <button type="button" (click)="loadStats()">Actualiser</button>
       </div>
-
-      <div class="state" *ngIf="loading">Chargement des statistiques...</div>
-      <div class="state error" *ngIf="!loading && error">{{ error }}</div>
-
-      <div class="stats-grid" *ngIf="stats && !loading && !error">
-        <article class="card"><h3>Réservations totales</h3><strong>{{ stats.totalReservations }}</strong></article>
-        <article class="card"><h3>En attente</h3><strong>{{ stats.reservationsEnAttente }}</strong></article>
-        <article class="card"><h3>Confirmées</h3><strong>{{ stats.reservationsConfirmees }}</strong></article>
-        <article class="card"><h3>Complétées</h3><strong>{{ stats.reservationsCompletees }}</strong></article>
-        <article class="card"><h3>Annulées</h3><strong>{{ stats.reservationsAnnulees }}</strong></article>
-        <article class="card"><h3>Voyages</h3><strong>{{ stats.totalVoyages }}</strong></article>
-        <article class="card"><h3>Voyages disponibles</h3><strong>{{ stats.voyagesDisponibles }}</strong></article>
-        <article class="card"><h3>Voyageurs</h3><strong>{{ stats.totalVoyageurs }}</strong></article>
-        <article class="card"><h3>Voyageurs actifs</h3><strong>{{ stats.voyageursActifs }}</strong></article>
-        <article class="card"><h3>Voyageurs bloqués</h3><strong>{{ stats.voyageursBloques }}</strong></article>
-        <article class="card accent"><h3>Chiffre d'affaires</h3><strong>{{ revenueTotal | number:'1.2-2' }} MAD</strong></article>
-      </div>
+    
+      @if (loading) {
+        <div class="state">Chargement des statistiques...</div>
+      }
+      @if (!loading && error) {
+        <div class="state error">{{ error }}</div>
+      }
+    
+      @if (stats && !loading && !error) {
+        <div class="stats-grid">
+          <article class="card"><h3>Réservations totales</h3><strong>{{ stats.totalReservations }}</strong></article>
+          <article class="card"><h3>En attente</h3><strong>{{ stats.reservationsEnAttente }}</strong></article>
+          <article class="card"><h3>Confirmées</h3><strong>{{ stats.reservationsConfirmees }}</strong></article>
+          <article class="card"><h3>Complétées</h3><strong>{{ stats.reservationsCompletees }}</strong></article>
+          <article class="card"><h3>Annulées</h3><strong>{{ stats.reservationsAnnulees }}</strong></article>
+          <article class="card"><h3>Voyages</h3><strong>{{ stats.totalVoyages }}</strong></article>
+          <article class="card"><h3>Voyages disponibles</h3><strong>{{ stats.voyagesDisponibles }}</strong></article>
+          <article class="card"><h3>Voyageurs</h3><strong>{{ stats.totalVoyageurs }}</strong></article>
+          <article class="card"><h3>Voyageurs actifs</h3><strong>{{ stats.voyageursActifs }}</strong></article>
+          <article class="card"><h3>Voyageurs bloqués</h3><strong>{{ stats.voyageursBloques }}</strong></article>
+          <article class="card accent"><h3>Chiffre d'affaires</h3><strong>{{ revenueTotal | number:'1.2-2' }} MAD</strong></article>
+        </div>
+      }
     </section>
-  `,
+    `,
   styles: [`
     .page { display: grid; gap: 1rem; }
     .page-header { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; }

@@ -8,31 +8,30 @@
     <nav class="sidebar-nav">
       @for (item of visibleMenuItems; track item.route) {
         <a [routerLink]="item.route"
-           routerLinkActive="active"
-           class="nav-item">
+          routerLinkActive="active"
+          class="nav-item">
           <span class="label">{{ item.label }}</span>
         </a>
       }
     </nav>
 
     <div class="sidebar-footer">
-      <ng-container *ngIf="isLoggedIn; else guestActions">
-      <div class="user-info">
-        <span class="user-name">{{ authService.getCurrentUser()?.prenom }} {{ authService.getCurrentUser()?.nom }}</span>
-        <span class="user-email">{{ authService.getCurrentUser()?.email }}</span>
-      </div>
-      <button class="logout-btn" (click)="logout()">
-        Déconnexion
-      </button>
-      </ng-container>
-      <ng-template #guestActions>
+      @if (isLoggedIn) {
+        <div class="user-info">
+          <span class="user-name">{{ authService.getCurrentUser()?.prenom }} {{ authService.getCurrentUser()?.nom }}</span>
+          <span class="user-email">{{ authService.getCurrentUser()?.email }}</span>
+        </div>
+        <button class="logout-btn" (click)="logout()">
+          Déconnexion
+        </button>
+      } @else {
         <button class="logout-btn" (click)="goToLogin()">
           Se connecter
         </button>
         <button class="logout-btn" (click)="goToRegister()">
           Créer un compte
         </button>
-      </ng-template>
+      }
     </div>
   </aside>
 

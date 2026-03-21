@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ActiviteService } from '../../../../../core/services/activite.service';
@@ -9,7 +9,7 @@ import { Activite, Voyage } from '../../../../../core/models/voyage.model';
 @Component({
   selector: 'app-client-activite-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink],
   templateUrl: './activite-list.component.html',
   styleUrl: './activite-list.component.scss'
 })

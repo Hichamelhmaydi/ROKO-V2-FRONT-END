@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ReservationService } from '../../../../core/services/reservation.service';
 import { PageResponse } from '../../../../core/models/common.model';
@@ -8,7 +8,7 @@ import { Reservation } from '../../../../core/models/reservation.model';
 @Component({
   selector: 'app-admin-reservations',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <section class="page">
       <div class="page-header">
@@ -16,73 +16,90 @@ import { Reservation } from '../../../../core/models/reservation.model';
           <h1>Gestion des réservations</h1>
           <p>Supervision des réservations, confirmations et clôtures.</p>
         </div>
-
+    
         <div class="toolbar">
           <select [(ngModel)]="selectedStatus" (change)="loadReservations()">
             <option value="">Tous les statuts</option>
-            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
           </select>
-
+    
           <button type="button" (click)="loadReservations()">Actualiser</button>
         </div>
       </div>
-
-      <div class="state" *ngIf="loading">Chargement des réservations...</div>
-      <div class="state error" *ngIf="!loading && error">{{ error }}</div>
-
-      <div class="table-card" *ngIf="!loading && !error">
-        <table *ngIf="reservations.length; else emptyState">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Voyage</th>
-              <th>Voyageur</th>
-              <th>Personnes</th>
-              <th>Montant</th>
-              <th>Statut</th>
-              <th>Paiement</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let reservation of reservations">
-              <td>#{{ reservation.id }}</td>
-              <td>
-                <strong>{{ reservation.voyageNom }}</strong>
-                <div>{{ reservation.voyageDestination }}</div>
-              </td>
-              <td>
-                {{ reservation.userPrenom }} {{ reservation.userNom }}
-                <div>{{ reservation.userEmail }}</div>
-              </td>
-              <td>{{ reservation.nombrePersonnes }}</td>
-              <td>{{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</td>
-              <td><span class="badge">{{ reservation.statut }}</span></td>
-              <td>{{ reservation.paiementEffectue ? 'Payé' : 'En attente' }}</td>
-              <td>
-                <div class="actions">
-                  <button type="button" *ngIf="reservation.statut === 'EN_ATTENTE' || reservation.statut === 'CREE'" (click)="confirmer(reservation)">Confirmer</button>
-                  <button type="button" *ngIf="reservation.statut === 'CONFIRMEE' || reservation.statut === 'PAYEE'" (click)="completer(reservation)">Compléter</button>
-                  <button type="button" *ngIf="reservation.statut !== 'ANNULEE' && reservation.statut !== 'COMPLETEE'" (click)="annuler(reservation)">Annuler</button>
-                  <button type="button" class="danger" (click)="supprimer(reservation)">Supprimer</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <ng-template #emptyState>
-          <div class="empty">Aucune réservation à afficher.</div>
-        </ng-template>
-
-        <div class="pagination" *ngIf="!selectedStatus && totalPages > 1">
-          <button type="button" [disabled]="page === 0" (click)="changePage(page - 1)">Précédent</button>
-          <span>Page {{ page + 1 }} / {{ totalPages }}</span>
-          <button type="button" [disabled]="page + 1 >= totalPages" (click)="changePage(page + 1)">Suivant</button>
+    
+      @if (loading) {
+        <div class="state">Chargement des réservations...</div>
+      }
+      @if (!loading && error) {
+        <div class="state error">{{ error }}</div>
+      }
+    
+      @if (!loading && !error) {
+        <div class="table-card">
+          @if (reservations.length) {
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Voyage</th>
+                  <th>Voyageur</th>
+                  <th>Personnes</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                  <th>Paiement</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (reservation of reservations; track reservation) {
+                  <tr>
+                    <td>#{{ reservation.id }}</td>
+                    <td>
+                      <strong>{{ reservation.voyageNom }}</strong>
+                      <div>{{ reservation.voyageDestination }}</div>
+                    </td>
+                    <td>
+                      {{ reservation.userPrenom }} {{ reservation.userNom }}
+                      <div>{{ reservation.userEmail }}</div>
+                    </td>
+                    <td>{{ reservation.nombrePersonnes }}</td>
+                    <td>{{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</td>
+                    <td><span class="badge">{{ reservation.statut }}</span></td>
+                    <td>{{ reservation.paiementEffectue ? 'Payé' : 'En attente' }}</td>
+                    <td>
+                      <div class="actions">
+                        @if (reservation.statut === 'EN_ATTENTE' || reservation.statut === 'CREE') {
+                          <button type="button" (click)="confirmer(reservation)">Confirmer</button>
+                        }
+                        @if (reservation.statut === 'CONFIRMEE' || reservation.statut === 'PAYEE') {
+                          <button type="button" (click)="completer(reservation)">Compléter</button>
+                        }
+                        @if (reservation.statut !== 'ANNULEE' && reservation.statut !== 'COMPLETEE') {
+                          <button type="button" (click)="annuler(reservation)">Annuler</button>
+                        }
+                        <button type="button" class="danger" (click)="supprimer(reservation)">Supprimer</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="empty">Aucune réservation à afficher.</div>
+          }
+          @if (!selectedStatus && totalPages > 1) {
+            <div class="pagination">
+              <button type="button" [disabled]="page === 0" (click)="changePage(page - 1)">Précédent</button>
+              <span>Page {{ page + 1 }} / {{ totalPages }}</span>
+              <button type="button" [disabled]="page + 1 >= totalPages" (click)="changePage(page + 1)">Suivant</button>
+            </div>
+          }
         </div>
-      </div>
+      }
     </section>
-  `,
+    `,
   styles: [`
     .page { display: grid; gap: 1rem; }
     .page-header, .toolbar, .actions, .pagination { display: flex; gap: 0.75rem; align-items: center; }

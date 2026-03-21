@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { VoyageurService } from '../../../../core/services/voyageur.service';
 import { User } from '../../../../core/models/user.model';
@@ -7,7 +7,7 @@ import { User } from '../../../../core/models/user.model';
 @Component({
   selector: 'app-admin-utilisateurs',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <section class="page">
       <div class="page-header">
@@ -15,44 +15,59 @@ import { User } from '../../../../core/models/user.model';
           <h1>Gestion des voyageurs</h1>
           <p>Recherche, consultation et blocage des comptes.</p>
         </div>
-
+    
         <div class="toolbar">
           <input [(ngModel)]="query" (keyup.enter)="loadVoyageurs()" placeholder="Nom, prénom, email...">
           <button type="button" (click)="loadVoyageurs()">Rechercher</button>
         </div>
       </div>
-
-      <div class="state" *ngIf="loading">Chargement des utilisateurs...</div>
-      <div class="state error" *ngIf="!loading && error">{{ error }}</div>
-
-      <div class="grid" *ngIf="!loading && !error">
-        <article class="card" *ngFor="let user of voyageurs">
-          <div class="card-top">
-            <div>
-              <h3>{{ user.prenom }} {{ user.nom }}</h3>
-              <p>{{ user.email }}</p>
-              <p>{{ user.telephone || 'Téléphone non renseigné' }}</p>
-            </div>
-            <span class="badge" [class.badge-off]="user.status !== 'ACTIVER'">{{ user.status || 'INCONNU' }}</span>
-          </div>
-
-          <div class="meta">
-            <span>ID #{{ user.id }}</span>
-            <span *ngIf="user.idNational">CIN: {{ user.idNational }}</span>
-            <span *ngIf="user.dateExpiration">Expiration: {{ user.dateExpiration }}</span>
-          </div>
-
-          <div class="actions">
-            <button type="button" *ngIf="user.status === 'ACTIVER'" (click)="blockUser(user)">Bloquer</button>
-            <button type="button" *ngIf="user.status !== 'ACTIVER'" (click)="unblockUser(user)">Débloquer</button>
-            <button type="button" class="ghost" (click)="refreshUser(user)">Rafraîchir</button>
-          </div>
-        </article>
-
-        <div class="empty" *ngIf="voyageurs.length === 0">Aucun voyageur trouvé.</div>
-      </div>
+    
+      @if (loading) {
+        <div class="state">Chargement des utilisateurs...</div>
+      }
+      @if (!loading && error) {
+        <div class="state error">{{ error }}</div>
+      }
+    
+      @if (!loading && !error) {
+        <div class="grid">
+          @for (user of voyageurs; track user) {
+            <article class="card">
+              <div class="card-top">
+                <div>
+                  <h3>{{ user.prenom }} {{ user.nom }}</h3>
+                  <p>{{ user.email }}</p>
+                  <p>{{ user.telephone || 'Téléphone non renseigné' }}</p>
+                </div>
+                <span class="badge" [class.badge-off]="user.status !== 'ACTIVER'">{{ user.status || 'INCONNU' }}</span>
+              </div>
+              <div class="meta">
+                <span>ID #{{ user.id }}</span>
+                @if (user.idNational) {
+                  <span>CIN: {{ user.idNational }}</span>
+                }
+                @if (user.dateExpiration) {
+                  <span>Expiration: {{ user.dateExpiration }}</span>
+                }
+              </div>
+              <div class="actions">
+                @if (user.status === 'ACTIVER') {
+                  <button type="button" (click)="blockUser(user)">Bloquer</button>
+                }
+                @if (user.status !== 'ACTIVER') {
+                  <button type="button" (click)="unblockUser(user)">Débloquer</button>
+                }
+                <button type="button" class="ghost" (click)="refreshUser(user)">Rafraîchir</button>
+              </div>
+            </article>
+          }
+          @if (voyageurs.length === 0) {
+            <div class="empty">Aucun voyageur trouvé.</div>
+          }
+        </div>
+      }
     </section>
-  `,
+    `,
   styles: [`
     .page { display: grid; gap: 1rem; }
     .page-header, .toolbar, .card-top, .actions { display: flex; gap: 0.75rem; align-items: center; }

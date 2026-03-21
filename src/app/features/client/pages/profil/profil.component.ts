@@ -13,56 +13,59 @@ import { User } from '../../../../core/models/user.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="page" *ngIf="profile">
-      <div class="page-header">
-        <div>
-          <h1>Mon profil</h1>
-          <p>Informations personnelles, notifications et activité récente.</p>
+    @if (profile) {
+      <section class="page">
+        <div class="page-header">
+          <div>
+            <h1>Mon profil</h1>
+            <p>Informations personnelles, notifications et activité récente.</p>
+          </div>
+          <button type="button" (click)="loadProfile()">Actualiser</button>
         </div>
-        <button type="button" (click)="loadProfile()">Actualiser</button>
-      </div>
-
-      <div class="grid">
-        <section class="card">
-          <h2>Informations personnelles</h2>
-
-          <label>Prénom <input [(ngModel)]="profile.prenom" name="prenom"></label>
-          <label>Nom <input [(ngModel)]="profile.nom" name="nom"></label>
-          <label>Email <input [(ngModel)]="profile.email" name="email"></label>
-          <label>Téléphone <input [(ngModel)]="profile.telephone" name="telephone"></label>
-
-          <div class="meta">
-            <span>Statut: {{ profile.status || 'N/A' }}</span>
-            <span>Réservations: {{ reservationCount }}</span>
-            <span>Notifications non lues: {{ unreadCount }}</span>
-          </div>
-
-          <div class="actions">
-            <button type="button" (click)="saveProfile()">Enregistrer</button>
-          </div>
-
-          <div class="message success" *ngIf="successMessage">{{ successMessage }}</div>
-          <div class="message error" *ngIf="error">{{ error }}</div>
-        </section>
-
-        <section class="card">
-          <h2>Notifications</h2>
-
-          <article class="notification" *ngFor="let notification of notifications">
-            <div>
-              <strong>{{ notification.titre }}</strong>
-              <p>{{ notification.message }}</p>
-              <small>{{ notification.dateCreation | date:'dd/MM/yyyy HH:mm' }}</small>
+        <div class="grid">
+          <section class="card">
+            <h2>Informations personnelles</h2>
+            <label>Prénom <input [(ngModel)]="profile.prenom" name="prenom"></label>
+            <label>Nom <input [(ngModel)]="profile.nom" name="nom"></label>
+            <label>Email <input [(ngModel)]="profile.email" name="email"></label>
+            <label>Téléphone <input [(ngModel)]="profile.telephone" name="telephone"></label>
+            <div class="meta">
+              <span>Statut: {{ profile.status || 'N/A' }}</span>
+              <span>Réservations: {{ reservationCount }}</span>
+              <span>Notifications non lues: {{ unreadCount }}</span>
             </div>
-
-            <button type="button" *ngIf="!notification.lu" (click)="markAsRead(notification)">Marquer comme lu</button>
-          </article>
-
-          <div class="empty" *ngIf="notifications.length === 0">Aucune notification pour le moment.</div>
-        </section>
-      </div>
-    </section>
-  `,
+            <div class="actions">
+              <button type="button" (click)="saveProfile()">Enregistrer</button>
+            </div>
+            @if (successMessage) {
+              <div class="message success">{{ successMessage }}</div>
+            }
+            @if (error) {
+              <div class="message error">{{ error }}</div>
+            }
+          </section>
+          <section class="card">
+            <h2>Notifications</h2>
+            @for (notification of notifications; track notification) {
+              <article class="notification">
+                <div>
+                  <strong>{{ notification.titre }}</strong>
+                  <p>{{ notification.message }}</p>
+                  <small>{{ notification.dateCreation | date:'dd/MM/yyyy HH:mm' }}</small>
+                </div>
+                @if (!notification.lu) {
+                  <button type="button" (click)="markAsRead(notification)">Marquer comme lu</button>
+                }
+              </article>
+            }
+            @if (notifications.length === 0) {
+              <div class="empty">Aucune notification pour le moment.</div>
+            }
+          </section>
+        </div>
+      </section>
+    }
+    `,
   styles: [`
     .page, .grid { display: grid; gap: 1rem; }
     .page-header, .actions, .notification { display: flex; gap: 0.75rem; justify-content: space-between; align-items: center; flex-wrap: wrap; }

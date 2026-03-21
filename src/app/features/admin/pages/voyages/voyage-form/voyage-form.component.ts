@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VoyageService } from '../../../../../core/services/voyage.service';
@@ -9,7 +9,7 @@ import { VoyageRequest } from '../../../../../core/models/voyage.model';
 @Component({
   selector: 'app-voyage-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink],
   templateUrl: './voyage-form.component.html',
   styleUrl: './voyage-form.component.scss'
 })

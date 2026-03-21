@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ActiviteService } from '../../../../../core/services/activite.service';
@@ -10,7 +10,7 @@ import { ActiviteRequest, ActiviteVoyage, Voyage } from '../../../../../core/mod
 @Component({
   selector: 'app-activite-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink],
   templateUrl: './activite-form.component.html',
   styleUrl: './activite-form.component.scss'
 })

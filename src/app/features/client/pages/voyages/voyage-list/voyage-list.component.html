@@ -10,42 +10,48 @@
     (input)="onSearch()"
     placeholder="Rechercher par destination, titre..."
     class="search-input">
-</div>
+  </div>
 
-<div class="loading" *ngIf="loading">
-  Chargement des voyages...
-</div>
-
-<div class="error" *ngIf="error">
-  {{ error }}
-</div>
-
-<div class="voyages-grid" *ngIf="!loading && !error">
-  <div class="voyage-card" *ngFor="let voyage of filteredVoyages">
-    <div class="voyage-image">
-      <img [src]="voyage.cover || 'assets/default-voyage.jpg'" [alt]="voyage.nom">
-      <div class="voyage-price">{{ voyage.prixBase }} MAD</div>
+  @if (loading) {
+    <div class="loading">
+      Chargement des voyages...
     </div>
+  }
 
-    <div class="voyage-content">
-      <h3>{{ voyage.nom }}</h3>
-      <p class="destination">{{ voyage.destination }}</p>
-      <p class="description">{{ voyage.description | slice:0:100 }}...</p>
+  @if (error) {
+    <div class="error">
+      {{ error }}
+    </div>
+  }
 
-      <div class="voyage-info">
-        <div class="info-item">
-          <span class="icon">📅</span>
-          <span>{{ voyage.dateDepart | date:'dd MMM' }} - {{ voyage.dateRetour | date:'dd MMM yyyy' }}</span>
+  @if (!loading && !error) {
+    <div class="voyages-grid">
+      @for (voyage of filteredVoyages; track voyage) {
+        <div class="voyage-card">
+          <div class="voyage-image">
+            <img [src]="voyage.cover || 'assets/default-voyage.jpg'" [alt]="voyage.nom">
+            <div class="voyage-price">{{ voyage.prixBase }} MAD</div>
+          </div>
+          <div class="voyage-content">
+            <h3>{{ voyage.nom }}</h3>
+            <p class="destination">{{ voyage.destination }}</p>
+            <p class="description">{{ voyage.description | slice:0:100 }}...</p>
+            <div class="voyage-info">
+              <div class="info-item">
+                <span class="icon">📅</span>
+                <span>{{ voyage.dateDepart | date:'dd MMM' }} - {{ voyage.dateRetour | date:'dd MMM yyyy' }}</span>
+              </div>
+            </div>
+            <a [routerLink]="['/client/voyages', voyage.id]" class="btn-details">
+              Voir les détails
+            </a>
+          </div>
         </div>
-      </div>
-
-      <a [routerLink]="['/client/voyages', voyage.id]" class="btn-details">
-        Voir les détails
-      </a>
+      }
+      @if (filteredVoyages.length === 0) {
+        <div class="no-data">
+          Aucun voyage trouvé pour votre recherche.
+        </div>
+      }
     </div>
-  </div>
-
-  <div class="no-data" *ngIf="filteredVoyages.length === 0">
-    Aucun voyage trouvé pour votre recherche.
-  </div>
-</div>
+  }

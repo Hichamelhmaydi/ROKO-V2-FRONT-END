@@ -1,120 +1,142 @@
-<div class="loading" *ngIf="loading">
-  Chargement...
-</div>
-
-<div class="error" *ngIf="error">
-  <p>{{ error }}</p>
-  <button (click)="goBack()" class="btn-back">Retour aux voyages</button>
-</div>
-
-<div class="voyage-detail" *ngIf="voyage && !loading && !error">
-  <div class="voyage-hero">
-    <img [src]="voyage.cover || 'assets/default-voyage.jpg'" [alt]="voyage.nom">
-    <div class="hero-overlay">
-      <button (click)="goBack()" class="btn-back-hero">← Retour</button>
-      <h1>{{ voyage.nom }}</h1>
-      <p class="destination">{{ voyage.destination }}</p>
-    </div>
+@if (loading) {
+  <div class="loading">
+    Chargement...
   </div>
+}
 
-  <!-- Carrousel des photos du voyage -->
-  <div class="photos-carousel" *ngIf="photos.length > 0">
-    <div class="carousel-container">
-      <button class="carousel-btn prev" (click)="prevPhoto()" *ngIf="photos.length > 1">&#8249;</button>
-      <div class="carousel-track">
-        <img
-          [src]="photos[currentPhotoIndex]"
-          [alt]="voyage.nom + ' - photo ' + (currentPhotoIndex + 1)"
-          class="carousel-image">
-      </div>
-      <button class="carousel-btn next" (click)="nextPhoto()" *ngIf="photos.length > 1">&#8250;</button>
-    </div>
-    <div class="carousel-dots" *ngIf="photos.length > 1">
-      <span
-        *ngFor="let photo of photos; let i = index"
-        class="dot"
-        [class.active]="i === currentPhotoIndex"
-        (click)="setPhoto(i)">
-      </span>
-    </div>
-    <p class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ photos.length }}</p>
+@if (error) {
+  <div class="error">
+    <p>{{ error }}</p>
+    <button (click)="goBack()" class="btn-back">Retour aux voyages</button>
   </div>
+}
 
-  <div class="voyage-content">
-    <div class="main-info">
-      <div class="info-cards">
-        <div class="info-card">
-          <span class="icon">📅</span>
-          <span class="label">Durée</span>
-          <span class="value">{{ getDuration() }} jours</span>
-        </div>
-        <div class="info-card">
-          <span class="icon">🛫</span>
-          <span class="label">Départ</span>
-          <span class="value">{{ voyage.dateDepart | date:'dd MMM yyyy' }}</span>
-        </div>
-        <div class="info-card">
-          <span class="icon">🛬</span>
-          <span class="label">Retour</span>
-          <span class="value">{{ voyage.dateRetour | date:'dd MMM yyyy' }}</span>
-        </div>
+@if (voyage && !loading && !error) {
+  <div class="voyage-detail">
+    <div class="voyage-hero">
+      <img [src]="voyage.cover || 'assets/default-voyage.jpg'" [alt]="voyage.nom">
+      <div class="hero-overlay">
+        <button (click)="goBack()" class="btn-back-hero">← Retour</button>
+        <h1>{{ voyage.nom }}</h1>
+        <p class="destination">{{ voyage.destination }}</p>
       </div>
-
-      <div class="description-section">
-        <h2>Description</h2>
-        <p>{{ voyage.description }}</p>
-      </div>
-
-      <div class="itineraire-section" *ngIf="voyage.itineraire">
-        <h2>Itinéraire</h2>
-        <p>{{ voyage.itineraire }}</p>
-      </div>
-
-      <div class="activites-section" *ngIf="activites.length > 0">
-        <h2>Activités incluses</h2>
-        <div class="activites-list">
-          <div class="activite-card" *ngFor="let activite of activites">
-            <div class="activite-header">
-              <h3>{{ activite.nom }}</h3>
-              <span class="activite-price">{{ activite.prix }} MAD</span>
+    </div>
+    <!-- Carrousel des photos du voyage -->
+    @if (photos.length > 0) {
+      <div class="photos-carousel">
+        <div class="carousel-container">
+          @if (photos.length > 1) {
+            <button class="carousel-btn prev" (click)="prevPhoto()">&#8249;</button>
+          }
+          <div class="carousel-track">
+            <img
+              [src]="photos[currentPhotoIndex]"
+              [alt]="voyage.nom + ' - photo ' + (currentPhotoIndex + 1)"
+              class="carousel-image">
             </div>
-            <p>{{ activite.description }}</p>
-            <span class="activite-duration" *ngIf="activite.duree">Durée: {{ activite.duree }} min</span>
+            @if (photos.length > 1) {
+              <button class="carousel-btn next" (click)="nextPhoto()">&#8250;</button>
+            }
+          </div>
+          @if (photos.length > 1) {
+            <div class="carousel-dots">
+              @for (photo of photos; track photo; let i = $index) {
+                <span
+                  class="dot"
+                  [class.active]="i === currentPhotoIndex"
+                  (click)="setPhoto(i)">
+                </span>
+              }
+            </div>
+          }
+          <p class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ photos.length }}</p>
+        </div>
+      }
+      <div class="voyage-content">
+        <div class="main-info">
+          <div class="info-cards">
+            <div class="info-card">
+              <span class="icon">📅</span>
+              <span class="label">Durée</span>
+              <span class="value">{{ getDuration() }} jours</span>
+            </div>
+            <div class="info-card">
+              <span class="icon">🛫</span>
+              <span class="label">Départ</span>
+              <span class="value">{{ voyage.dateDepart | date:'dd MMM yyyy' }}</span>
+            </div>
+            <div class="info-card">
+              <span class="icon">🛬</span>
+              <span class="label">Retour</span>
+              <span class="value">{{ voyage.dateRetour | date:'dd MMM yyyy' }}</span>
+            </div>
+          </div>
+          <div class="description-section">
+            <h2>Description</h2>
+            <p>{{ voyage.description }}</p>
+          </div>
+          @if (voyage.itineraire) {
+            <div class="itineraire-section">
+              <h2>Itinéraire</h2>
+              <p>{{ voyage.itineraire }}</p>
+            </div>
+          }
+          @if (activites.length > 0) {
+            <div class="activites-section">
+              <h2>Activités incluses</h2>
+              <div class="activites-list">
+                @for (activite of activites; track activite) {
+                  <div class="activite-card">
+                    <div class="activite-header">
+                      <h3>{{ activite.nom }}</h3>
+                      <span class="activite-price">{{ activite.prix }} MAD</span>
+                    </div>
+                    <p>{{ activite.description }}</p>
+                    @if (activite.duree) {
+                      <span class="activite-duration">Durée: {{ activite.duree }} min</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <div class="booking-sidebar">
+          <div class="booking-card">
+            <div class="price">
+              @if (voyage.prixInitial !== voyage.prixBase) {
+                <div class="price-initial">
+                  <span class="label-prix">Prix de base</span>
+                  <span class="amount-initial">{{ voyage.prixInitial }} MAD</span>
+                </div>
+              }
+              <div [class.price-total]="voyage.prixInitial !== voyage.prixBase">
+                @if (voyage.prixInitial !== voyage.prixBase) {
+                  <span class="label-prix">Prix avec activités obligatoires</span>
+                }
+                <span class="amount">{{ voyage.prixBase }}</span>
+                <span class="currency">MAD</span>
+              </div>
+              <span class="per-person">/ personne</span>
+            </div>
+            @if (authService.isLoggedIn()) {
+              <a
+                [routerLink]="['/client/reservations']"
+                [queryParams]="{ voyageId: voyage.id }"
+                class="btn-book">
+                Réserver maintenant
+              </a>
+            }
+            @if (!authService.isLoggedIn()) {
+              <a [routerLink]="['/login']" class="btn-book">
+                Connectez-vous pour réserver
+              </a>
+            }
+            <p class="note">
+              Paiement sécurisé via Stripe
+            </p>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="booking-sidebar">
-      <div class="booking-card">
-        <div class="price">
-          <div *ngIf="voyage.prixInitial !== voyage.prixBase" class="price-initial">
-            <span class="label-prix">Prix de base</span>
-            <span class="amount-initial">{{ voyage.prixInitial }} MAD</span>
-          </div>
-          <div [class.price-total]="voyage.prixInitial !== voyage.prixBase">
-            <span class="label-prix" *ngIf="voyage.prixInitial !== voyage.prixBase">Prix avec activités obligatoires</span>
-            <span class="amount">{{ voyage.prixBase }}</span>
-            <span class="currency">MAD</span>
-          </div>
-          <span class="per-person">/ personne</span>
-        </div>
-
-        <a *ngIf="authService.isLoggedIn()"
-           [routerLink]="['/client/reservations']"
-           [queryParams]="{ voyageId: voyage.id }"
-           class="btn-book">
-          Réserver maintenant
-        </a>
-
-        <a *ngIf="!authService.isLoggedIn()" [routerLink]="['/login']" class="btn-book">
-          Connectez-vous pour réserver
-        </a>
-
-        <p class="note">
-          Paiement sécurisé via Stripe
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
+  }

@@ -1,17 +1,19 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-placeholder',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="placeholder-container">
-      <div class="placeholder-icon" *ngIf="icon">{{ icon }}</div>
+      @if (icon) {
+        <div class="placeholder-icon">{{ icon }}</div>
+      }
       <h2>{{ title }}</h2>
       <p>{{ message }}</p>
     </div>
-  `,
+    `,
   styles: [`
     .placeholder-container {
       display: flex;

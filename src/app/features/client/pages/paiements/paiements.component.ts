@@ -19,41 +19,55 @@ import { Reservation } from '../../../../core/models/reservation.model';
         </div>
         <button type="button" (click)="reload()">Actualiser</button>
       </div>
-
-      <div class="state success" *ngIf="successMessage">{{ successMessage }}</div>
-      <div class="state error" *ngIf="error">{{ error }}</div>
-
+    
+      @if (successMessage) {
+        <div class="state success">{{ successMessage }}</div>
+      }
+      @if (error) {
+        <div class="state error">{{ error }}</div>
+      }
+    
       <section class="list-card">
         <h2>Réservations à payer</h2>
-        <div class="reservation-item" *ngFor="let reservation of pendingReservations">
-          <div>
-            <strong>{{ reservation.voyageNom }}</strong>
-            <p>{{ reservation.nombrePersonnes }} personne(s) - {{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</p>
+        @for (reservation of pendingReservations; track reservation) {
+          <div class="reservation-item">
+            <div>
+              <strong>{{ reservation.voyageNom }}</strong>
+              <p>{{ reservation.nombrePersonnes }} personne(s) - {{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</p>
+            </div>
+            <button type="button" (click)="startPayment(reservation)">Payer</button>
           </div>
-          <button type="button" (click)="startPayment(reservation)">Payer</button>
-        </div>
-
-        <div class="empty" *ngIf="pendingReservations.length === 0">Aucune réservation en attente de paiement.</div>
+        }
+    
+        @if (pendingReservations.length === 0) {
+          <div class="empty">Aucune réservation en attente de paiement.</div>
+        }
       </section>
-
+    
       <section class="list-card">
         <h2>Historique des paiements</h2>
-        <div class="payment-item" *ngFor="let payment of payments">
-          <div>
-            <strong>Paiement #{{ payment.id }}</strong>
-            <p>Réservation #{{ payment.reservationId }} - {{ payment.amount | number:'1.2-2' }} MAD</p>
-            <small>{{ payment.dateCreation | date:'dd/MM/yyyy HH:mm' }}</small>
+        @for (payment of payments; track payment) {
+          <div class="payment-item">
+            <div>
+              <strong>Paiement #{{ payment.id }}</strong>
+              <p>Réservation #{{ payment.reservationId }} - {{ payment.amount | number:'1.2-2' }} MAD</p>
+              <small>{{ payment.dateCreation | date:'dd/MM/yyyy HH:mm' }}</small>
+            </div>
+            <div class="payment-actions">
+              <span class="badge">{{ payment.status }}</span>
+              @if (payment.status === 'EN_ATTENTE' || payment.status === 'EN_COURS') {
+                <button type="button" (click)="cancelPayment(payment)">Annuler</button>
+              }
+            </div>
           </div>
-          <div class="payment-actions">
-            <span class="badge">{{ payment.status }}</span>
-            <button type="button" *ngIf="payment.status === 'EN_ATTENTE' || payment.status === 'EN_COURS'" (click)="cancelPayment(payment)">Annuler</button>
-          </div>
-        </div>
-
-        <div class="empty" *ngIf="payments.length === 0">Aucun paiement enregistré.</div>
+        }
+    
+        @if (payments.length === 0) {
+          <div class="empty">Aucun paiement enregistré.</div>
+        }
       </section>
     </section>
-  `,
+    `,
   styles: [`
     .page { display: grid; gap: 1rem; }
     .page-header, .reservation-item, .payment-item, .payment-actions { display: flex; gap: 0.75rem; justify-content: space-between; align-items: center; flex-wrap: wrap; }

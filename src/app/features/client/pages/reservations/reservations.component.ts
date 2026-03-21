@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -12,7 +12,7 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
 @Component({
   selector: 'app-client-reservations',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink],
   template: `
     <section class="page">
       <div class="page-header">
@@ -22,7 +22,7 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
         </div>
         <button type="button" (click)="reload()">Actualiser</button>
       </div>
-
+    
       <section class="form-card">
         <h2>Nouvelle réservation</h2>
         <div class="grid">
@@ -30,93 +30,116 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
             Voyage
             <select [(ngModel)]="form.voyageId" name="voyageId" (change)="onVoyageChange()">
               <option [ngValue]="0">Sélectionnez un voyage</option>
-              <option *ngFor="let voyage of voyages" [ngValue]="voyage.id">
-                {{ voyage.nom }} - {{ voyage.destination }}
-              </option>
+              @for (voyage of voyages; track voyage) {
+                <option [ngValue]="voyage.id">
+                  {{ voyage.nom }} - {{ voyage.destination }}
+                </option>
+              }
             </select>
           </label>
-
+    
           <label>
             Nombre de personnes
             <input type="number" min="1" [(ngModel)]="form.nombrePersonnes" name="nombrePersonnes">
           </label>
         </div>
-
+    
         <label>
           Commentaire
           <textarea rows="3" [(ngModel)]="form.commentaire" name="commentaire" placeholder="Précisions utiles pour cette réservation"></textarea>
         </label>
-
-        <div class="options" *ngIf="activitesObligatoires.length">
-          <h3>Activités obligatoires</h3>
-          <label class="option-item required" *ngFor="let activite of activitesObligatoires">
-            <input type="checkbox" [checked]="true" disabled>
-            <span>
-              <strong>{{ activite.activiteNom }}</strong>
-              <small>{{ getActivityPrice(activite) }} MAD</small>
-            </span>
-          </label>
-        </div>
-
-        <div class="options" *ngIf="activitesOptionnelles.length">
-          <h3>Activités optionnelles</h3>
-          <label class="option-item" *ngFor="let activite of activitesOptionnelles">
-            <input
-              type="checkbox"
-              [checked]="isSelected(activite.activiteId)"
-              (change)="toggleActivite(activite.activiteId, $any($event.target).checked)">
-            <span>
-              <strong>{{ activite.activiteNom }}</strong>
-              <small>{{ getActivityPrice(activite) }} MAD</small>
-            </span>
-          </label>
-        </div>
-
-        <div class="options" *ngIf="form.voyageId">
-          <h3>Total estimé</h3>
-          <p>Base voyage: {{ getSelectedVoyageInitialPrice() }} MAD</p>
-          <p>Activités obligatoires: {{ getSelectedMandatoryTotal() }} MAD</p>
-          <p>Options choisies: {{ getSelectedOptionalTotal() }} MAD</p>
-          <p><strong>Total / personne: {{ getEstimatedTotalPerPerson() }} MAD</strong></p>
-          <p><strong>Total global: {{ getEstimatedGrandTotal() }} MAD</strong></p>
-        </div>
-
-        <div class="error" *ngIf="formError">{{ formError }}</div>
-
-        <div class="actions">
-          <button type="button" (click)="submitReservation()" [disabled]="submitting">{{ submitting ? 'Envoi...' : 'Réserver' }}</button>
-        </div>
-      </section>
-
-      <div class="state" *ngIf="loading">Chargement de vos réservations...</div>
-      <div class="state error" *ngIf="!loading && error">{{ error }}</div>
-
-      <div class="cards" *ngIf="!loading && !error">
-        <article class="card" *ngFor="let reservation of reservations">
-          <div class="card-head">
-            <div>
-              <h3>{{ reservation.voyageNom }}</h3>
-              <p>{{ reservation.voyageDestination }}</p>
+    
+        @if (activitesObligatoires.length) {
+          <div class="options">
+            <h3>Activités obligatoires</h3>
+            @for (activite of activitesObligatoires; track activite) {
+              <label class="option-item required">
+                <input type="checkbox" [checked]="true" disabled>
+                <span>
+                  <strong>{{ activite.activiteNom }}</strong>
+                  <small>{{ getActivityPrice(activite) }} MAD</small>
+                </span>
+              </label>
+            }
+          </div>
+        }
+    
+        @if (activitesOptionnelles.length) {
+          <div class="options">
+            <h3>Activités optionnelles</h3>
+            @for (activite of activitesOptionnelles; track activite) {
+              <label class="option-item">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(activite.activiteId)"
+                  (change)="toggleActivite(activite.activiteId, $any($event.target).checked)">
+                  <span>
+                    <strong>{{ activite.activiteNom }}</strong>
+                    <small>{{ getActivityPrice(activite) }} MAD</small>
+                  </span>
+                </label>
+              }
             </div>
-            <span class="badge">{{ reservation.statut }}</span>
-          </div>
-
-          <div class="meta">
-            <span>{{ reservation.nombrePersonnes }} personne(s)</span>
-            <span>{{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</span>
-            <span>{{ reservation.paiementEffectue ? 'Paiement confirmé' : 'Paiement non finalisé' }}</span>
-          </div>
-
+          }
+    
+          @if (form.voyageId) {
+            <div class="options">
+              <h3>Total estimé</h3>
+              <p>Base voyage: {{ getSelectedVoyageInitialPrice() }} MAD</p>
+              <p>Activités obligatoires: {{ getSelectedMandatoryTotal() }} MAD</p>
+              <p>Options choisies: {{ getSelectedOptionalTotal() }} MAD</p>
+              <p><strong>Total / personne: {{ getEstimatedTotalPerPerson() }} MAD</strong></p>
+              <p><strong>Total global: {{ getEstimatedGrandTotal() }} MAD</strong></p>
+            </div>
+          }
+    
+          @if (formError) {
+            <div class="error">{{ formError }}</div>
+          }
+    
           <div class="actions">
-            <a [routerLink]="['/client/paiements']" class="link-btn">Voir paiements</a>
-            <button type="button" *ngIf="reservation.statut !== 'ANNULEE' && reservation.statut !== 'COMPLETEE'" (click)="cancelReservation(reservation)">Annuler</button>
+            <button type="button" (click)="submitReservation()" [disabled]="submitting">{{ submitting ? 'Envoi...' : 'Réserver' }}</button>
           </div>
-        </article>
-
-        <div class="empty" *ngIf="reservations.length === 0">Aucune réservation enregistrée pour le moment.</div>
-      </div>
-    </section>
-  `,
+        </section>
+    
+        @if (loading) {
+          <div class="state">Chargement de vos réservations...</div>
+        }
+        @if (!loading && error) {
+          <div class="state error">{{ error }}</div>
+        }
+    
+        @if (!loading && !error) {
+          <div class="cards">
+            @for (reservation of reservations; track reservation) {
+              <article class="card">
+                <div class="card-head">
+                  <div>
+                    <h3>{{ reservation.voyageNom }}</h3>
+                    <p>{{ reservation.voyageDestination }}</p>
+                  </div>
+                  <span class="badge">{{ reservation.statut }}</span>
+                </div>
+                <div class="meta">
+                  <span>{{ reservation.nombrePersonnes }} personne(s)</span>
+                  <span>{{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</span>
+                  <span>{{ reservation.paiementEffectue ? 'Paiement confirmé' : 'Paiement non finalisé' }}</span>
+                </div>
+                <div class="actions">
+                  <a [routerLink]="['/client/paiements']" class="link-btn">Voir paiements</a>
+                  @if (reservation.statut !== 'ANNULEE' && reservation.statut !== 'COMPLETEE') {
+                    <button type="button" (click)="cancelReservation(reservation)">Annuler</button>
+                  }
+                </div>
+              </article>
+            }
+            @if (reservations.length === 0) {
+              <div class="empty">Aucune réservation enregistrée pour le moment.</div>
+            }
+          </div>
+        }
+      </section>
+    `,
   styles: [`
     .page, .form-card, .cards { display: grid; gap: 1rem; }
     .page-header, .actions, .card-head { display: flex; gap: 0.75rem; justify-content: space-between; align-items: center; flex-wrap: wrap; }

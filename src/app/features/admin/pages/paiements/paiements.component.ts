@@ -15,61 +15,77 @@ import { Payment } from '../../../../core/models/payment.model';
           <h1>Gestion des paiements</h1>
           <p>Suivi des transactions Stripe et remboursements.</p>
         </div>
-
+    
         <div class="toolbar">
           <select [(ngModel)]="selectedStatus" (change)="loadPayments()">
             <option value="">Tous les statuts</option>
-            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
           </select>
           <button type="button" (click)="loadPayments()">Actualiser</button>
         </div>
       </div>
-
-      <div class="summary-card" *ngIf="!loading && !error">
-        <strong>Chiffre d'affaires total</strong>
-        <span>{{ revenueTotal | number:'1.2-2' }} MAD</span>
-      </div>
-
-      <div class="state" *ngIf="loading">Chargement des paiements...</div>
-      <div class="state error" *ngIf="!loading && error">{{ error }}</div>
-
-      <div class="table-card" *ngIf="!loading && !error">
-        <table *ngIf="payments.length; else emptyState">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Réservation</th>
-              <th>Montant</th>
-              <th>Statut</th>
-              <th>Création</th>
-              <th>Paiement</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let payment of payments">
-              <td>#{{ payment.id }}</td>
-              <td>#{{ payment.reservationId }}</td>
-              <td>{{ payment.amount | number:'1.2-2' }} MAD</td>
-              <td><span class="badge">{{ payment.status }}</span></td>
-              <td>{{ payment.dateCreation | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>{{ payment.datePaiement ? (payment.datePaiement | date:'dd/MM/yyyy HH:mm') : 'Non payé' }}</td>
-              <td>
-                <div class="actions">
-                  <button type="button" *ngIf="payment.status === 'EN_ATTENTE' || payment.status === 'EN_COURS'" (click)="cancelPayment(payment)">Annuler</button>
-                  <button type="button" *ngIf="payment.status === 'REUSSI'" (click)="refundPayment(payment)">Rembourser</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <ng-template #emptyState>
-          <div class="empty">Aucun paiement trouvé.</div>
-        </ng-template>
-      </div>
+    
+      @if (!loading && !error) {
+        <div class="summary-card">
+          <strong>Chiffre d'affaires total</strong>
+          <span>{{ revenueTotal | number:'1.2-2' }} MAD</span>
+        </div>
+      }
+    
+      @if (loading) {
+        <div class="state">Chargement des paiements...</div>
+      }
+      @if (!loading && error) {
+        <div class="state error">{{ error }}</div>
+      }
+    
+      @if (!loading && !error) {
+        <div class="table-card">
+          @if (payments.length) {
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Réservation</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                  <th>Création</th>
+                  <th>Paiement</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (payment of payments; track payment) {
+                  <tr>
+                    <td>#{{ payment.id }}</td>
+                    <td>#{{ payment.reservationId }}</td>
+                    <td>{{ payment.amount | number:'1.2-2' }} MAD</td>
+                    <td><span class="badge">{{ payment.status }}</span></td>
+                    <td>{{ payment.dateCreation | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ payment.datePaiement ? (payment.datePaiement | date:'dd/MM/yyyy HH:mm') : 'Non payé' }}</td>
+                    <td>
+                      <div class="actions">
+                        @if (payment.status === 'EN_ATTENTE' || payment.status === 'EN_COURS') {
+                          <button type="button" (click)="cancelPayment(payment)">Annuler</button>
+                        }
+                        @if (payment.status === 'REUSSI') {
+                          <button type="button" (click)="refundPayment(payment)">Rembourser</button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="empty">Aucun paiement trouvé.</div>
+          }
+        </div>
+      }
     </section>
-  `,
+    `,
   styles: [`
     .page { display: grid; gap: 1rem; }
     .page-header, .toolbar, .actions { display: flex; gap: 0.75rem; align-items: center; }
