@@ -56,7 +56,7 @@ import { Reservation } from '../../../../core/models/reservation.model';
                 <div>{{ reservation.userEmail }}</div>
               </td>
               <td>{{ reservation.nombrePersonnes }}</td>
-              <td>{{ reservation.montantTotal || reservation.prixBase || 0 }} EUR</td>
+              <td>{{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</td>
               <td><span class="badge">{{ reservation.statut }}</span></td>
               <td>{{ reservation.paiementEffectue ? 'Payé' : 'En attente' }}</td>
               <td>
@@ -170,3 +170,4 @@ export class AdminReservationsComponent implements OnInit {
     this.reservationService.delete(reservation.id).subscribe({ next: () => this.loadReservations() });
   }
 }
+

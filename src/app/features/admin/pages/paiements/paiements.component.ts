@@ -27,7 +27,7 @@ import { Payment } from '../../../../core/models/payment.model';
 
       <div class="summary-card" *ngIf="!loading && !error">
         <strong>Chiffre d'affaires total</strong>
-        <span>{{ revenueTotal | number:'1.2-2' }} EUR</span>
+        <span>{{ revenueTotal | number:'1.2-2' }} MAD</span>
       </div>
 
       <div class="state" *ngIf="loading">Chargement des paiements...</div>
@@ -50,7 +50,7 @@ import { Payment } from '../../../../core/models/payment.model';
             <tr *ngFor="let payment of payments">
               <td>#{{ payment.id }}</td>
               <td>#{{ payment.reservationId }}</td>
-              <td>{{ payment.amount | number:'1.2-2' }} EUR</td>
+              <td>{{ payment.amount | number:'1.2-2' }} MAD</td>
               <td><span class="badge">{{ payment.status }}</span></td>
               <td>{{ payment.dateCreation | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ payment.datePaiement ? (payment.datePaiement | date:'dd/MM/yyyy HH:mm') : 'Non payé' }}</td>
@@ -141,3 +141,4 @@ export class AdminPaiementsComponent implements OnInit {
     });
   }
 }
+

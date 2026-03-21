@@ -28,7 +28,7 @@ import { Reservation } from '../../../../core/models/reservation.model';
         <div class="reservation-item" *ngFor="let reservation of pendingReservations">
           <div>
             <strong>{{ reservation.voyageNom }}</strong>
-            <p>{{ reservation.nombrePersonnes }} personne(s) - {{ reservation.montantTotal || reservation.prixBase || 0 }} EUR</p>
+            <p>{{ reservation.nombrePersonnes }} personne(s) - {{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</p>
           </div>
           <button type="button" (click)="startPayment(reservation)">Payer</button>
         </div>
@@ -41,7 +41,7 @@ import { Reservation } from '../../../../core/models/reservation.model';
         <div class="payment-item" *ngFor="let payment of payments">
           <div>
             <strong>Paiement #{{ payment.id }}</strong>
-            <p>Réservation #{{ payment.reservationId }} - {{ payment.amount | number:'1.2-2' }} EUR</p>
+            <p>Réservation #{{ payment.reservationId }} - {{ payment.amount | number:'1.2-2' }} MAD</p>
             <small>{{ payment.dateCreation | date:'dd/MM/yyyy HH:mm' }}</small>
           </div>
           <div class="payment-actions">
@@ -139,3 +139,4 @@ export class ClientPaiementsComponent implements OnInit {
     this.paymentService.annuler(payment.id).subscribe({ next: () => this.reload() });
   }
 }
+

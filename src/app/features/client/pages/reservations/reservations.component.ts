@@ -53,7 +53,7 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
             <input type="checkbox" [checked]="true" disabled>
             <span>
               <strong>{{ activite.activiteNom }}</strong>
-              <small>{{ getActivityPrice(activite) }} EUR</small>
+              <small>{{ getActivityPrice(activite) }} MAD</small>
             </span>
           </label>
         </div>
@@ -67,18 +67,18 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
               (change)="toggleActivite(activite.activiteId, $any($event.target).checked)">
             <span>
               <strong>{{ activite.activiteNom }}</strong>
-              <small>{{ getActivityPrice(activite) }} EUR</small>
+              <small>{{ getActivityPrice(activite) }} MAD</small>
             </span>
           </label>
         </div>
 
         <div class="options" *ngIf="form.voyageId">
           <h3>Total estimé</h3>
-          <p>Base voyage: {{ getSelectedVoyageInitialPrice() }} EUR</p>
-          <p>Activités obligatoires: {{ getSelectedMandatoryTotal() }} EUR</p>
-          <p>Options choisies: {{ getSelectedOptionalTotal() }} EUR</p>
-          <p><strong>Total / personne: {{ getEstimatedTotalPerPerson() }} EUR</strong></p>
-          <p><strong>Total global: {{ getEstimatedGrandTotal() }} EUR</strong></p>
+          <p>Base voyage: {{ getSelectedVoyageInitialPrice() }} MAD</p>
+          <p>Activités obligatoires: {{ getSelectedMandatoryTotal() }} MAD</p>
+          <p>Options choisies: {{ getSelectedOptionalTotal() }} MAD</p>
+          <p><strong>Total / personne: {{ getEstimatedTotalPerPerson() }} MAD</strong></p>
+          <p><strong>Total global: {{ getEstimatedGrandTotal() }} MAD</strong></p>
         </div>
 
         <div class="error" *ngIf="formError">{{ formError }}</div>
@@ -103,7 +103,7 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
 
           <div class="meta">
             <span>{{ reservation.nombrePersonnes }} personne(s)</span>
-            <span>{{ reservation.montantTotal || reservation.prixBase || 0 }} EUR</span>
+            <span>{{ reservation.montantTotal || reservation.prixBase || 0 }} MAD</span>
             <span>{{ reservation.paiementEffectue ? 'Paiement confirmé' : 'Paiement non finalisé' }}</span>
           </div>
 
@@ -303,3 +303,4 @@ export class ClientReservationsComponent implements OnInit {
     this.reservationService.annuler(reservation.id, motif).subscribe({ next: () => this.loadReservations() });
   }
 }
+

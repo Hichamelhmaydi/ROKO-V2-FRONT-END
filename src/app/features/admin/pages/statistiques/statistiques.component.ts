@@ -32,7 +32,7 @@ import { AdminDashboard } from '../../../../core/models/dashboard.model';
         <article class="card"><h3>Voyageurs</h3><strong>{{ stats.totalVoyageurs }}</strong></article>
         <article class="card"><h3>Voyageurs actifs</h3><strong>{{ stats.voyageursActifs }}</strong></article>
         <article class="card"><h3>Voyageurs bloqués</h3><strong>{{ stats.voyageursBloques }}</strong></article>
-        <article class="card accent"><h3>Chiffre d'affaires</h3><strong>{{ revenueTotal | number:'1.2-2' }} EUR</strong></article>
+        <article class="card accent"><h3>Chiffre d'affaires</h3><strong>{{ revenueTotal | number:'1.2-2' }} MAD</strong></article>
       </div>
     </section>
   `,
@@ -86,3 +86,4 @@ export class AdminStatistiquesComponent implements OnInit {
     });
   }
 }
+
