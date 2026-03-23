@@ -8,6 +8,7 @@ import { ReservationService } from '../../../../core/services/reservation.servic
 import { VoyageService } from '../../../../core/services/voyage.service';
 import { Reservation, ReservationRequest } from '../../../../core/models/reservation.model';
 import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
+import { PopupService } from '../../../../core/services/popup.service';
 
 @Component({
   selector: 'app-client-reservations',
@@ -111,7 +112,7 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
     
         @if (!loading && !error) {
           <div class="cards">
-            @for (reservation of reservations; track reservation) {
+            @for (reservation of pagedReservations; track reservation) {
               <article class="card">
                 <div class="card-head">
                   <div>
@@ -137,6 +138,14 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
               <div class="empty">Aucune réservation enregistrée pour le moment.</div>
             }
           </div>
+
+          @if (reservations.length > pageSize) {
+            <div class="pagination">
+              <button type="button" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Precedent</button>
+              <span>Page {{ currentPage }} / {{ totalPages }}</span>
+              <button type="button" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Suivant</button>
+            </div>
+          }
         }
       </section>
     `,
@@ -154,6 +163,7 @@ import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
     .badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 0.3rem 0.65rem; border-radius: 999px; font-weight: 700; }
     .meta { display: grid; gap: 0.35rem; color: #475569; }
     .error { color: #b91c1c; }
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
   `]
 })
 export class ClientReservationsComponent implements OnInit {
@@ -165,6 +175,8 @@ export class ClientReservationsComponent implements OnInit {
   error = '';
   formError = '';
   submitting = false;
+  currentPage = 1;
+  readonly pageSize = 6;
   form: ReservationRequest = {
     voyageId: 0,
     nombrePersonnes: 1,
@@ -177,7 +189,8 @@ export class ClientReservationsComponent implements OnInit {
     private voyageService: VoyageService,
     private activiteVoyageService: ActiviteVoyageService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private popupService: PopupService
   ) {}
 
   ngOnInit(): void {
@@ -207,6 +220,7 @@ export class ClientReservationsComponent implements OnInit {
     this.reservationService.getMine().subscribe({
       next: (reservations) => {
         this.reservations = reservations;
+        this.currentPage = 1;
         this.loading = false;
       },
       error: (err) => {
@@ -321,8 +335,32 @@ export class ClientReservationsComponent implements OnInit {
     return this.getEstimatedTotalPerPerson() * qty;
   }
 
-  cancelReservation(reservation: Reservation): void {
-    const motif = prompt('Motif d\'annulation', reservation.motifAnnulation || '') ?? '';
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.reservations.length / this.pageSize));
+  }
+
+  get pagedReservations(): Reservation[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.reservations.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = Math.min(Math.max(page, 1), this.totalPages);
+  }
+
+  async cancelReservation(reservation: Reservation): Promise<void> {
+    const motif = await this.popupService.promptText({
+      title: 'Annuler cette reservation',
+      label: `Reservation #${reservation.id}`,
+      initialValue: reservation.motifAnnulation || '',
+      placeholder: 'Motif d\'annulation',
+      confirmText: 'Confirmer'
+    });
+
+    if (motif === null) {
+      return;
+    }
+
     this.reservationService.annuler(reservation.id, motif).subscribe({ next: () => this.loadReservations() });
   }
 }

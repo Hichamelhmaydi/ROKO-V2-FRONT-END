@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ReservationService } from '../../../../core/services/reservation.service';
 import { PageResponse } from '../../../../core/models/common.model';
 import { Reservation } from '../../../../core/models/reservation.model';
+import { PopupService } from '../../../../core/services/popup.service';
 
 @Component({
   selector: 'app-admin-reservations',
@@ -53,7 +54,7 @@ import { Reservation } from '../../../../core/models/reservation.model';
                 </tr>
               </thead>
               <tbody>
-                @for (reservation of reservations; track reservation) {
+                @for (reservation of displayedReservations; track reservation) {
                   <tr>
                     <td>#{{ reservation.id }}</td>
                     <td>
@@ -89,6 +90,13 @@ import { Reservation } from '../../../../core/models/reservation.model';
           } @else {
             <div class="empty">Aucune réservation à afficher.</div>
           }
+          @if (selectedStatus && filteredTotalPages > 1) {
+            <div class="pagination">
+              <button type="button" [disabled]="statusPage === 1" (click)="changePage(statusPage - 1)">Précédent</button>
+              <span>Page {{ statusPage }} / {{ filteredTotalPages }}</span>
+              <button type="button" [disabled]="statusPage >= filteredTotalPages" (click)="changePage(statusPage + 1)">Suivant</button>
+            </div>
+          }
           @if (!selectedStatus && totalPages > 1) {
             <div class="pagination">
               <button type="button" [disabled]="page === 0" (click)="changePage(page - 1)">Précédent</button>
@@ -121,10 +129,15 @@ export class AdminReservationsComponent implements OnInit {
   error = '';
   page = 0;
   totalPages = 0;
+  statusPage = 1;
+  readonly pageSize = 10;
   readonly statuses = ['CREE', 'EN_ATTENTE', 'EN_ATTENTE_PAIEMENT', 'CONFIRMEE', 'PAYEE', 'COMPLETEE', 'ANNULEE', 'ECHEC'];
   selectedStatus = '';
 
-  constructor(private reservationService: ReservationService) {}
+  constructor(
+    private reservationService: ReservationService,
+    private popupService: PopupService
+  ) {}
 
   ngOnInit(): void {
     this.loadReservations();
@@ -138,7 +151,7 @@ export class AdminReservationsComponent implements OnInit {
       this.reservationService.getByStatut(this.selectedStatus).subscribe({
         next: (reservations: Reservation[]) => {
           this.reservations = reservations;
-          this.totalPages = 1;
+          this.statusPage = 1;
           this.loading = false;
         },
         error: (err: any) => {
@@ -162,7 +175,25 @@ export class AdminReservationsComponent implements OnInit {
     });
   }
 
+  get filteredTotalPages(): number {
+    return Math.max(1, Math.ceil(this.reservations.length / this.pageSize));
+  }
+
+  get displayedReservations(): Reservation[] {
+    if (!this.selectedStatus) {
+      return this.reservations;
+    }
+
+    const start = (this.statusPage - 1) * this.pageSize;
+    return this.reservations.slice(start, start + this.pageSize);
+  }
+
   changePage(page: number): void {
+    if (this.selectedStatus) {
+      this.statusPage = Math.min(Math.max(page, 1), this.filteredTotalPages);
+      return;
+    }
+
     this.page = page;
     this.loadReservations();
   }
@@ -175,15 +206,34 @@ export class AdminReservationsComponent implements OnInit {
     this.reservationService.completer(reservation.id).subscribe({ next: () => this.loadReservations() });
   }
 
-  annuler(reservation: Reservation): void {
-    const motif = prompt('Motif d\'annulation', reservation.motifAnnulation || '') ?? '';
+  async annuler(reservation: Reservation): Promise<void> {
+    const motif = await this.popupService.promptText({
+      title: 'Motif d\'annulation',
+      label: `Reservation #${reservation.id}`,
+      initialValue: reservation.motifAnnulation || '',
+      placeholder: 'Ex: indisponibilite client',
+      confirmText: 'Confirmer'
+    });
+
+    if (motif === null) {
+      return;
+    }
+
     this.reservationService.annuler(reservation.id, motif).subscribe({ next: () => this.loadReservations() });
   }
 
-  supprimer(reservation: Reservation): void {
-    if (!confirm(`Supprimer la réservation #${reservation.id} ?`)) {
+  async supprimer(reservation: Reservation): Promise<void> {
+    const confirmed = await this.popupService.confirm({
+      title: `Supprimer la reservation #${reservation.id} ?`,
+      text: 'Cette action est definitive.',
+      icon: 'warning',
+      confirmText: 'Oui, supprimer'
+    });
+
+    if (!confirmed) {
       return;
     }
+
     this.reservationService.delete(reservation.id).subscribe({ next: () => this.loadReservations() });
   }
 }

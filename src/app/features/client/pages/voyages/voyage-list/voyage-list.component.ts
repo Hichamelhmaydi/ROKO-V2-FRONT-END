@@ -18,6 +18,8 @@ export class ClientVoyageListComponent implements OnInit {
   loading = true;
   error = '';
   searchTerm = '';
+  currentPage = 1;
+  readonly pageSize = 6;
 
   constructor(private voyageService: VoyageService) {}
 
@@ -31,6 +33,7 @@ export class ClientVoyageListComponent implements OnInit {
       next: (data) => {
         this.voyages = data;
         this.filteredVoyages = data;
+        this.currentPage = 1;
         this.loading = false;
       },
       error: (err) => {
@@ -44,6 +47,7 @@ export class ClientVoyageListComponent implements OnInit {
   onSearch(): void {
     if (!this.searchTerm.trim()) {
       this.filteredVoyages = this.voyages;
+      this.currentPage = 1;
       return;
     }
 
@@ -53,5 +57,19 @@ export class ClientVoyageListComponent implements OnInit {
       v.destination.toLowerCase().includes(term) ||
       v.description?.toLowerCase().includes(term)
     );
+    this.currentPage = 1;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredVoyages.length / this.pageSize));
+  }
+
+  get pagedVoyages(): Voyage[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredVoyages.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = Math.min(Math.max(page, 1), this.totalPages);
   }
 }

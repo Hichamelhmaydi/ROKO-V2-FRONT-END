@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { VoyageurService } from '../../../../core/services/voyageur.service';
 import { User } from '../../../../core/models/user.model';
+import { PopupService } from '../../../../core/services/popup.service';
 
 @Component({
   selector: 'app-admin-utilisateurs',
@@ -31,7 +32,7 @@ import { User } from '../../../../core/models/user.model';
     
       @if (!loading && !error) {
         <div class="grid">
-          @for (user of voyageurs; track user) {
+          @for (user of pagedVoyageurs; track user) {
             <article class="card">
               <div class="card-top">
                 <div>
@@ -65,6 +66,14 @@ import { User } from '../../../../core/models/user.model';
             <div class="empty">Aucun voyageur trouvé.</div>
           }
         </div>
+
+        @if (voyageurs.length > pageSize) {
+          <div class="pagination">
+            <button type="button" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Precedent</button>
+            <span>Page {{ currentPage }} / {{ totalPages }}</span>
+            <button type="button" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Suivant</button>
+          </div>
+        }
       }
     </section>
     `,
@@ -82,6 +91,7 @@ import { User } from '../../../../core/models/user.model';
     input, button { border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.6rem 0.85rem; background: #fff; }
     .ghost { color: #334155; }
     .error { color: #b91c1c; }
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
   `]
 })
 export class AdminUtilisateursComponent implements OnInit {
@@ -89,8 +99,13 @@ export class AdminUtilisateursComponent implements OnInit {
   query = '';
   loading = true;
   error = '';
+  currentPage = 1;
+  readonly pageSize = 9;
 
-  constructor(private voyageurService: VoyageurService) {}
+  constructor(
+    private voyageurService: VoyageurService,
+    private popupService: PopupService
+  ) {}
 
   ngOnInit(): void {
     this.loadVoyageurs();
@@ -107,6 +122,7 @@ export class AdminUtilisateursComponent implements OnInit {
     request.subscribe({
       next: (users) => {
         this.voyageurs = users;
+        this.currentPage = 1;
         this.loading = false;
       },
       error: (err) => {
@@ -124,11 +140,45 @@ export class AdminUtilisateursComponent implements OnInit {
     });
   }
 
-  blockUser(user: User): void {
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.voyageurs.length / this.pageSize));
+  }
+
+  get pagedVoyageurs(): User[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.voyageurs.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = Math.min(Math.max(page, 1), this.totalPages);
+  }
+
+  async blockUser(user: User): Promise<void> {
+    const confirmed = await this.popupService.confirm({
+      title: `Bloquer ${user.prenom} ${user.nom} ?`,
+      text: 'Le compte sera desactive temporairement.',
+      icon: 'warning',
+      confirmText: 'Bloquer'
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     this.voyageurService.block(user.id).subscribe({ next: () => this.loadVoyageurs() });
   }
 
-  unblockUser(user: User): void {
+  async unblockUser(user: User): Promise<void> {
+    const confirmed = await this.popupService.confirm({
+      title: `Debloquer ${user.prenom} ${user.nom} ?`,
+      icon: 'question',
+      confirmText: 'Debloquer'
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     this.voyageurService.unblock(user.id).subscribe({ next: () => this.loadVoyageurs() });
   }
 }

@@ -1,9 +1,10 @@
-<div class="page-header">
+<div class="page-header card-shell">
+  <p class="eyebrow">Experiences</p>
   <h1>Activités disponibles</h1>
   <p class="subtitle">Découvrez les expériences uniques de nos voyages</p>
 </div>
 
-<div class="filter-bar">
+<div class="filter-bar card-shell">
   <select [(ngModel)]="selectedVoyageId" (change)="filterByVoyage()">
     <option [ngValue]="null">Tous les voyages</option>
     @for (voyage of voyages; track voyage) {
@@ -28,7 +29,7 @@
 
 @if (!loading && !error) {
   <div class="activites-grid">
-    @for (activite of filteredActivites; track activite) {
+    @for (activite of pagedActivites; track activite) {
       <div class="activite-card">
         <div class="activite-icon">🎯</div>
         <div class="activite-content">
@@ -59,4 +60,12 @@
       </div>
     }
   </div>
+
+  @if (filteredActivites.length > pageSize) {
+    <div class="pagination">
+      <button type="button" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Precedent</button>
+      <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <button type="button" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Suivant</button>
+    </div>
+  }
 }

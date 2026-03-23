@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentService } from '../../../../core/services/payment.service';
 import { Payment } from '../../../../core/models/payment.model';
+import { PopupService } from '../../../../core/services/popup.service';
 
 @Component({
   selector: 'app-admin-paiements',
@@ -57,7 +58,7 @@ import { Payment } from '../../../../core/models/payment.model';
                 </tr>
               </thead>
               <tbody>
-                @for (payment of payments; track payment) {
+                @for (payment of pagedPayments; track payment) {
                   <tr>
                     <td>#{{ payment.id }}</td>
                     <td>#{{ payment.reservationId }}</td>
@@ -82,6 +83,14 @@ import { Payment } from '../../../../core/models/payment.model';
           } @else {
             <div class="empty">Aucun paiement trouvé.</div>
           }
+
+          @if (payments.length > pageSize) {
+            <div class="pagination">
+              <button type="button" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Precedent</button>
+              <span>Page {{ currentPage }} / {{ totalPages }}</span>
+              <button type="button" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Suivant</button>
+            </div>
+          }
         </div>
       }
     </section>
@@ -96,6 +105,7 @@ import { Payment } from '../../../../core/models/payment.model';
     .badge { display: inline-block; padding: 0.3rem 0.6rem; border-radius: 999px; background: #ede9fe; color: #5b21b6; font-weight: 700; }
     button, select { border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.55rem 0.85rem; background: #fff; }
     .error { color: #b91c1c; }
+    .pagination { margin-top: 0.8rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
   `]
 })
 export class AdminPaiementsComponent implements OnInit {
@@ -104,9 +114,14 @@ export class AdminPaiementsComponent implements OnInit {
   loading = true;
   error = '';
   selectedStatus = '';
+  currentPage = 1;
+  readonly pageSize = 12;
   readonly statuses = ['EN_ATTENTE', 'EN_COURS', 'REUSSI', 'ECHOUE', 'ANNULE', 'REMBOURSE', 'REMBOURSEMENT_EN_COURS'];
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(
+    private paymentService: PaymentService,
+    private popupService: PopupService
+  ) {}
 
   ngOnInit(): void {
     this.loadPayments();
@@ -123,6 +138,7 @@ export class AdminPaiementsComponent implements OnInit {
     request.subscribe({
       next: (payments) => {
         this.payments = payments;
+        this.currentPage = 1;
         this.loading = false;
       },
       error: (err) => {
@@ -140,16 +156,55 @@ export class AdminPaiementsComponent implements OnInit {
     });
   }
 
-  cancelPayment(payment: Payment): void {
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.payments.length / this.pageSize));
+  }
+
+  get pagedPayments(): Payment[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.payments.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = Math.min(Math.max(page, 1), this.totalPages);
+  }
+
+  async cancelPayment(payment: Payment): Promise<void> {
+    const confirmed = await this.popupService.confirm({
+      title: `Annuler le paiement #${payment.id} ?`,
+      text: 'Le paiement passera au statut annule.',
+      icon: 'warning',
+      confirmText: 'Oui, annuler'
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     this.paymentService.annuler(payment.id).subscribe({ next: () => this.loadPayments() });
   }
 
-  refundPayment(payment: Payment): void {
-    const rawAmount = prompt('Montant à rembourser (laisser vide pour la totalité)', String(payment.amount));
-    const reason = prompt('Raison du remboursement', 'Remboursement administratif') || undefined;
-    const amount = rawAmount ? Number(rawAmount) : undefined;
+  async refundPayment(payment: Payment): Promise<void> {
+    const amount = await this.popupService.promptNumber({
+      title: 'Montant a rembourser',
+      label: `Paiement #${payment.id}`,
+      initialValue: payment.amount,
+      placeholder: 'Laisser vide pour totalite',
+      allowEmpty: true,
+      confirmText: 'Continuer'
+    });
 
-    this.paymentService.rembourser(payment.id, { amount, reason }).subscribe({
+    const reason = await this.popupService.promptText({
+      title: 'Raison du remboursement',
+      initialValue: 'Remboursement administratif',
+      placeholder: 'Motif interne'
+    });
+
+    if (reason === null) {
+      return;
+    }
+
+    this.paymentService.rembourser(payment.id, { amount: amount ?? undefined, reason }).subscribe({
       next: () => {
         this.loadPayments();
         this.loadRevenue();

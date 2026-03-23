@@ -2,48 +2,59 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 
   h1 {
     margin: 0;
-    color: #333;
-    font-size: 1.8rem;
+    color: #24343a;
+    font-size: 1.9rem;
+  }
+
+  .eyebrow {
+    color: #5e6f87;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 6px;
   }
 }
 
 .btn-add {
-  background: #3498db;
+  background: linear-gradient(135deg, #2f5d7b 0%, #0f766e 100%);
   color: white;
-  padding: 12px 24px;
-  border-radius: 4px;
+  padding: 11px 20px;
+  border-radius: 11px;
   text-decoration: none;
-  font-weight: 600;
-  transition: background 0.2s;
+  font-weight: 700;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 12px 20px rgba(30, 72, 94, 0.24);
 
   &:hover {
-    background: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 24px rgba(30, 72, 94, 0.32);
   }
 }
 
 .loading, .error, .no-data {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: #657175;
   font-size: 1.1rem;
 }
 
 .error {
-  color: #c62828;
-  background: #ffebee;
-  border-radius: 4px;
-  border: 1px solid #ffcdd2;
+  color: #b24742;
+  background: #fff1ef;
+  border-radius: 12px;
+  border: 1px solid #f2c6c1;
 }
 
 .table-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 16px;
+  box-shadow: 0 18px 34px rgba(55, 49, 37, 0.12);
+  border: 1px solid #ddd3c7;
   overflow: hidden;
 }
 
@@ -57,48 +68,48 @@
   }
 
   th {
-    background: #f5f5f5;
+    background: #f2ede6;
     font-weight: 600;
-    color: #333;
-    border-bottom: 1px solid #e0e0e0;
+    color: #314148;
+    border-bottom: 1px solid #ddd3c7;
   }
 
   td {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #eadfd3;
   }
 
   tr:hover td {
-    background: #fafafa;
+    background: #f8f4ee;
   }
 }
 
 .activite-name {
   strong {
     display: block;
-    color: #333;
+    color: #2f3f45;
   }
 
   .description {
     display: block;
     font-size: 0.85rem;
-    color: #999;
+    color: #8f9aa0;
     margin-top: 4px;
   }
 }
 
 .voyage-badge {
   display: inline-block;
-  background: #e3f2fd;
-  color: #1976D2;
-  padding: 4px 12px;
-  border-radius: 4px;
+  background: #ecfaf7;
+  color: #0f766e;
+  padding: 5px 12px;
+  border-radius: 999px;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .price {
-  color: #27ae60;
-  font-weight: 600;
+  color: #0f766e;
+  font-weight: 700;
 }
 
 .actions {
@@ -108,7 +119,7 @@
   .btn-edit, .btn-delete {
     padding: 6px 12px;
     border: none;
-    border-radius: 4px;
+    border-radius: 9px;
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s;
@@ -116,20 +127,48 @@
   }
 
   .btn-edit {
-    background: #3498db;
+    background: #2f5d7b;
     color: white;
 
     &:hover {
-      background: #2980b9;
+      background: #274d66;
     }
   }
 
   .btn-delete {
-    background: #e74c3c;
+    background: #a6403b;
     color: white;
 
     &:hover {
-      background: #c0392b;
+      background: #87342f;
     }
+  }
+}
+
+.pagination {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  button {
+    border: 1px solid #d2c8bb;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.84);
+    padding: 8px 12px;
+    font-weight: 700;
+    color: #3d4d54;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    color: #5a676c;
+    font-weight: 700;
   }
 }

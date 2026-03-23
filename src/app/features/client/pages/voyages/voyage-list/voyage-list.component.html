@@ -1,9 +1,10 @@
-<div class="page-header">
+<div class="page-header card-shell">
+  <p class="eyebrow">Collection Signature</p>
   <h1>Découvrez nos Voyages</h1>
-  <p class="subtitle">Explorez des destinations incroyables</p>
+  <p class="subtitle">Explorez des destinations incroyables avec une interface pensée pour le confort.</p>
 </div>
 
-<div class="search-bar">
+<div class="search-bar card-shell">
   <input
     type="text"
     [(ngModel)]="searchTerm"
@@ -26,15 +27,15 @@
 
   @if (!loading && !error) {
     <div class="voyages-grid">
-      @for (voyage of filteredVoyages; track voyage) {
+      @for (voyage of pagedVoyages; track voyage) {
         <div class="voyage-card">
           <div class="voyage-image">
             <img [src]="voyage.cover || 'assets/default-voyage.jpg'" [alt]="voyage.nom">
             <div class="voyage-price">{{ voyage.prixBase }} MAD</div>
+            <div class="voyage-tag">{{ voyage.destination }}</div>
           </div>
           <div class="voyage-content">
             <h3>{{ voyage.nom }}</h3>
-            <p class="destination">{{ voyage.destination }}</p>
             <p class="description">{{ voyage.description | slice:0:100 }}...</p>
             <div class="voyage-info">
               <div class="info-item">
@@ -54,4 +55,12 @@
         </div>
       }
     </div>
+
+  @if (filteredVoyages.length > pageSize) {
+    <div class="pagination">
+      <button type="button" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Precedent</button>
+      <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <button type="button" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Suivant</button>
+    </div>
+  }
   }

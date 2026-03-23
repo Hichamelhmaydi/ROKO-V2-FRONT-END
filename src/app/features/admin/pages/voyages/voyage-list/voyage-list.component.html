@@ -1,5 +1,8 @@
 <div class="page-header">
-  <h1>Gestion des Voyages</h1>
+  <div>
+    <p class="eyebrow">Administration</p>
+    <h1>Gestion des Voyages</h1>
+  </div>
   <a routerLink="/admin/voyages/nouveau" class="btn-add">+ Nouveau Voyage</a>
 </div>
 
@@ -17,7 +20,7 @@
 
 @if (!loading && !error) {
   <div class="voyages-grid">
-    @for (voyage of voyages; track voyage) {
+    @for (voyage of pagedVoyages; track voyage) {
       <div class="voyage-card">
         <div class="voyage-image">
           <img [src]="voyage.cover || 'assets/default-voyage.jpg'" [alt]="voyage.nom">
@@ -64,4 +67,12 @@
       </div>
     }
   </div>
+
+  @if (voyages.length > pageSize) {
+    <div class="pagination">
+      <button type="button" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Precedent</button>
+      <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <button type="button" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Suivant</button>
+    </div>
+  }
 }

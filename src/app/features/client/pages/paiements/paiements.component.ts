@@ -5,6 +5,7 @@ import { PaymentService } from '../../../../core/services/payment.service';
 import { ReservationService } from '../../../../core/services/reservation.service';
 import { Payment } from '../../../../core/models/payment.model';
 import { Reservation } from '../../../../core/models/reservation.model';
+import { PopupService } from '../../../../core/services/popup.service';
 
 @Component({
   selector: 'app-client-paiements',
@@ -29,7 +30,7 @@ import { Reservation } from '../../../../core/models/reservation.model';
     
       <section class="list-card">
         <h2>Réservations à payer</h2>
-        @for (reservation of pendingReservations; track reservation) {
+        @for (reservation of pagedPendingReservations; track reservation) {
           <div class="reservation-item">
             <div>
               <strong>{{ reservation.voyageNom }}</strong>
@@ -42,11 +43,18 @@ import { Reservation } from '../../../../core/models/reservation.model';
         @if (pendingReservations.length === 0) {
           <div class="empty">Aucune réservation en attente de paiement.</div>
         }
+        @if (pendingReservations.length > pendingPageSize) {
+          <div class="pagination">
+            <button type="button" [disabled]="pendingPage === 1" (click)="goToPendingPage(pendingPage - 1)">Precedent</button>
+            <span>Page {{ pendingPage }} / {{ pendingTotalPages }}</span>
+            <button type="button" [disabled]="pendingPage === pendingTotalPages" (click)="goToPendingPage(pendingPage + 1)">Suivant</button>
+          </div>
+        }
       </section>
     
       <section class="list-card">
         <h2>Historique des paiements</h2>
-        @for (payment of payments; track payment) {
+        @for (payment of pagedPayments; track payment) {
           <div class="payment-item">
             <div>
               <strong>Paiement #{{ payment.id }}</strong>
@@ -65,6 +73,13 @@ import { Reservation } from '../../../../core/models/reservation.model';
         @if (payments.length === 0) {
           <div class="empty">Aucun paiement enregistré.</div>
         }
+        @if (payments.length > pageSize) {
+          <div class="pagination">
+            <button type="button" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Precedent</button>
+            <span>Page {{ currentPage }} / {{ totalPages }}</span>
+            <button type="button" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Suivant</button>
+          </div>
+        }
       </section>
     </section>
     `,
@@ -78,6 +93,7 @@ import { Reservation } from '../../../../core/models/reservation.model';
     button { border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.6rem 0.85rem; background: #fff; }
     .success { color: #166534; }
     .error { color: #b91c1c; }
+    .pagination { margin-top: 0.8rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
   `]
 })
 export class ClientPaiementsComponent implements OnInit {
@@ -85,11 +101,16 @@ export class ClientPaiementsComponent implements OnInit {
   pendingReservations: Reservation[] = [];
   error = '';
   successMessage = '';
+  currentPage = 1;
+  readonly pageSize = 8;
+  pendingPage = 1;
+  readonly pendingPageSize = 6;
 
   constructor(
     private paymentService: PaymentService,
     private reservationService: ReservationService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private popupService: PopupService
   ) {}
 
   ngOnInit(): void {
@@ -98,10 +119,16 @@ export class ClientPaiementsComponent implements OnInit {
   }
 
   reload(): void {
-    this.paymentService.getMine().subscribe({ next: (payments) => { this.payments = payments; } });
+    this.paymentService.getMine().subscribe({
+      next: (payments) => {
+        this.payments = payments;
+        this.currentPage = 1;
+      }
+    });
     this.reservationService.getMine().subscribe({
       next: (reservations) => {
         this.pendingReservations = reservations.filter(item => !item.paiementEffectue && item.statut !== 'ANNULEE' && item.statut !== 'COMPLETEE');
+        this.pendingPage = 1;
       }
     });
   }
@@ -149,7 +176,44 @@ export class ClientPaiementsComponent implements OnInit {
     });
   }
 
-  cancelPayment(payment: Payment): void {
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.payments.length / this.pageSize));
+  }
+
+  get pagedPayments(): Payment[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.payments.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = Math.min(Math.max(page, 1), this.totalPages);
+  }
+
+  get pendingTotalPages(): number {
+    return Math.max(1, Math.ceil(this.pendingReservations.length / this.pendingPageSize));
+  }
+
+  get pagedPendingReservations(): Reservation[] {
+    const start = (this.pendingPage - 1) * this.pendingPageSize;
+    return this.pendingReservations.slice(start, start + this.pendingPageSize);
+  }
+
+  goToPendingPage(page: number): void {
+    this.pendingPage = Math.min(Math.max(page, 1), this.pendingTotalPages);
+  }
+
+  async cancelPayment(payment: Payment): Promise<void> {
+    const confirmed = await this.popupService.confirm({
+      title: `Annuler le paiement #${payment.id} ?`,
+      text: 'Cette operation est irreversible.',
+      icon: 'warning',
+      confirmText: 'Oui, annuler'
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     this.paymentService.annuler(payment.id).subscribe({ next: () => this.reload() });
   }
 }

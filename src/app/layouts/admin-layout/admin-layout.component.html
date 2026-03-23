@@ -2,7 +2,8 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <h1>ROKO</h1>
-      <span class="badge">Admin</span>
+      <span class="badge">Control Center</span>
+      <p>Pilotage précis de vos offres et opérations.</p>
     </div>
 
     <nav class="sidebar-nav">
@@ -27,6 +28,15 @@
   </aside>
 
   <main class="main-content">
+    <div class="content-topbar">
+      <div>
+        <p class="eyebrow">ADMIN WORKSPACE</p>
+        <h2>Tableau de gestion premium</h2>
+      </div>
+      <div class="user-pill">
+        <span>{{ authService.getCurrentUser()?.prenom }} {{ authService.getCurrentUser()?.nom }}</span>
+      </div>
+    </div>
     <router-outlet></router-outlet>
   </main>
 </div>
