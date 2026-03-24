@@ -20,8 +20,10 @@ export interface VoyageRequest {
   destination: string;
   dateDepart: string;
   dateRetour: string;
+  prixInitial?: number;
   prixBase: number;
   cover?: string;
+  photos?: string[];
   itineraire?: string;
 }
 

@@ -21,122 +21,134 @@
         <p class="destination">{{ voyage.destination }}</p>
       </div>
     </div>
-    <!-- Carrousel des photos du voyage -->
-    @if (photos.length > 0) {
-      <div class="photos-carousel">
-        <div class="carousel-container">
-          @if (photos.length > 1) {
-            <button class="carousel-btn prev" (click)="prevPhoto()">&#8249;</button>
-          }
-          <div class="carousel-track">
-            <img
-              [src]="photos[currentPhotoIndex]"
-              [alt]="voyage.nom + ' - photo ' + (currentPhotoIndex + 1)"
-              class="carousel-image">
-            </div>
-            @if (photos.length > 1) {
-              <button class="carousel-btn next" (click)="nextPhoto()">&#8250;</button>
-            }
+
+    <div class="voyage-content">
+      <div class="main-info">
+        <div class="info-cards">
+          <div class="info-card">
+            <span class="icon">📅</span>
+            <span class="label">Durée</span>
+            <span class="value">{{ getDuration() }} jours</span>
           </div>
-          @if (photos.length > 1) {
-            <div class="carousel-dots">
-              @for (photo of photos; track photo; let i = $index) {
-                <span
-                  class="dot"
-                  [class.active]="i === currentPhotoIndex"
-                  (click)="setPhoto(i)">
-                </span>
+          <div class="info-card">
+            <span class="icon">🛫</span>
+            <span class="label">Départ</span>
+            <span class="value">{{ voyage.dateDepart | date:'dd MMM yyyy' }}</span>
+          </div>
+          <div class="info-card">
+            <span class="icon">🛬</span>
+            <span class="label">Retour</span>
+            <span class="value">{{ voyage.dateRetour | date:'dd MMM yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="description-section">
+          <h2>Description</h2>
+          <p>{{ voyage.description }}</p>
+        </div>
+
+        @if (photos.length > 0) {
+          <div class="photos-carousel">
+            <div class="carousel-container">
+              @if (photos.length > 1) {
+                <button class="carousel-btn prev" (click)="prevPhoto()">&#8249;</button>
+              }
+
+              <div class="carousel-track">
+                <img
+                  [src]="photos[currentPhotoIndex]"
+                  [alt]="voyage.nom + ' - photo ' + (currentPhotoIndex + 1)"
+                  class="carousel-image">
+              </div>
+
+              @if (photos.length > 1) {
+                <button class="carousel-btn next" (click)="nextPhoto()">&#8250;</button>
               }
             </div>
-          }
-          <p class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ photos.length }}</p>
-        </div>
-      }
-      <div class="voyage-content">
-        <div class="main-info">
-          <div class="info-cards">
-            <div class="info-card">
-              <span class="icon">📅</span>
-              <span class="label">Durée</span>
-              <span class="value">{{ getDuration() }} jours</span>
-            </div>
-            <div class="info-card">
-              <span class="icon">🛫</span>
-              <span class="label">Départ</span>
-              <span class="value">{{ voyage.dateDepart | date:'dd MMM yyyy' }}</span>
-            </div>
-            <div class="info-card">
-              <span class="icon">🛬</span>
-              <span class="label">Retour</span>
-              <span class="value">{{ voyage.dateRetour | date:'dd MMM yyyy' }}</span>
-            </div>
-          </div>
-          <div class="description-section">
-            <h2>Description</h2>
-            <p>{{ voyage.description }}</p>
-          </div>
-          @if (voyage.itineraire) {
-            <div class="itineraire-section">
-              <h2>Itinéraire</h2>
-              <p>{{ voyage.itineraire }}</p>
-            </div>
-          }
-          @if (activites.length > 0) {
-            <div class="activites-section">
-              <h2>Activités incluses</h2>
-              <div class="activites-list">
-                @for (activite of activites; track activite) {
-                  <div class="activite-card">
-                    <div class="activite-header">
-                      <h3>{{ activite.nom }}</h3>
-                      <span class="activite-price">{{ activite.prix }} MAD</span>
-                    </div>
-                    <p>{{ activite.description }}</p>
-                    @if (activite.duree) {
-                      <span class="activite-duration">Durée: {{ activite.duree }} min</span>
-                    }
-                  </div>
+
+            @if (photos.length > 1) {
+              <div class="carousel-dots">
+                @for (photo of photos; track photo; let i = $index) {
+                  <span
+                    class="dot"
+                    [class.active]="i === currentPhotoIndex"
+                    (click)="setPhoto(i)">
+                  </span>
                 }
               </div>
-            </div>
-          }
-        </div>
-        <div class="booking-sidebar">
-          <div class="booking-card">
-            <div class="price">
-              @if (voyage.prixInitial !== voyage.prixBase) {
-                <div class="price-initial">
-                  <span class="label-prix">Prix de base</span>
-                  <span class="amount-initial">{{ voyage.prixInitial }} MAD</span>
+            }
+
+            <p class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ photos.length }}</p>
+          </div>
+        }
+
+        @if (voyage.itineraire) {
+          <div class="itineraire-section">
+            <h2>Itinéraire</h2>
+            <p>{{ voyage.itineraire }}</p>
+          </div>
+        }
+
+        @if (activites.length > 0) {
+          <div class="activites-section">
+            <h2>Activités incluses</h2>
+            <div class="activites-list">
+              @for (activite of activites; track activite) {
+                <div class="activite-card">
+                  <div class="activite-header">
+                    <h3>{{ activite.nom }}</h3>
+                    <span class="activite-price">{{ activite.prix }} MAD</span>
+                  </div>
+                  <p>{{ activite.description }}</p>
+                  @if (activite.duree) {
+                    <span class="activite-duration">Durée: {{ activite.duree }} min</span>
+                  }
                 </div>
               }
-              <div [class.price-total]="voyage.prixInitial !== voyage.prixBase">
-                @if (voyage.prixInitial !== voyage.prixBase) {
-                  <span class="label-prix">Prix avec activités obligatoires</span>
-                }
-                <span class="amount">{{ voyage.prixBase }}</span>
-                <span class="currency">MAD</span>
-              </div>
-              <span class="per-person">/ personne</span>
             </div>
-            @if (authService.isLoggedIn()) {
-              <a
-                [routerLink]="['/client/reservations']"
-                [queryParams]="{ voyageId: voyage.id }"
-                class="btn-book">
-                Réserver maintenant
-              </a>
-            }
-            @if (!authService.isLoggedIn()) {
-              <a [routerLink]="['/login']" class="btn-book">
-                Connectez-vous pour réserver
-              </a>
-            }
-            <p class="note">
-              Paiement sécurisé via Stripe
-            </p>
           </div>
+        }
+      </div>
+
+      <div class="booking-sidebar">
+        <div class="booking-card">
+          <div class="price">
+            @if (voyage.prixInitial !== voyage.prixBase) {
+              <div class="price-initial">
+                <span class="label-prix">Prix de base</span>
+                <span class="amount-initial">{{ voyage.prixInitial }} MAD</span>
+              </div>
+            }
+            <div [class.price-total]="voyage.prixInitial !== voyage.prixBase">
+              @if (voyage.prixInitial !== voyage.prixBase) {
+                <span class="label-prix">Prix avec activités obligatoires</span>
+              }
+              <span class="amount">{{ voyage.prixBase }}</span>
+              <span class="currency">MAD</span>
+            </div>
+            <span class="per-person">/ personne</span>
+          </div>
+
+          @if (authService.isLoggedIn()) {
+            <a
+              [routerLink]="['/client/reservations']"
+              [queryParams]="{ voyageId: voyage.id }"
+              class="btn-book">
+              Réserver maintenant
+            </a>
+          }
+
+          @if (!authService.isLoggedIn()) {
+            <a [routerLink]="['/login']" class="btn-book">
+              Connectez-vous pour réserver
+            </a>
+          }
+
+          <p class="note">
+            Paiement sécurisé via Stripe
+          </p>
         </div>
       </div>
     </div>
-  }
+  </div>
+}

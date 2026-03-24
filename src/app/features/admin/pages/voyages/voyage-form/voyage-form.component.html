@@ -50,6 +50,7 @@
               id="dateDepart"
               [(ngModel)]="voyage.dateDepart"
               name="dateDepart"
+              [min]="todayDate"
               required>
             </div>
 
@@ -60,6 +61,7 @@
                 id="dateRetour"
                 [(ngModel)]="voyage.dateRetour"
                 name="dateRetour"
+                [min]="voyage.dateDepart || todayDate"
                 required>
               </div>
             </div>
@@ -78,22 +80,65 @@
               </div>
 
               <div class="form-group">
-                <label for="image">Image du voyage</label>
+                <label for="coverImage">Image de couverture (cover)</label>
                 <input
                   type="file"
-                  id="image"
+                  id="coverImage"
                   (change)="onFileSelected($event)"
                   accept="image/*"
-                  #fileInput>
+                  #coverFileInput>
                   @if (imagePreview || voyage.cover) {
                     <div class="image-preview">
                       <img [src]="imagePreview || voyage.cover" alt="Aperçu">
                       <button type="button" (click)="removeImage()" class="btn-remove-image">Supprimer</button>
                     </div>
                   }
+                  <small style="color:#888;display:block;margin-top:8px;">Le cover est l'image principale du voyage.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="voyagePhotos">Photos du voyage et des lieux *</label>
+                  <input
+                    type="file"
+                    id="voyagePhotos"
+                    (change)="onPhotosSelected($event)"
+                    accept="image/*"
+                    multiple
+                    #photosFileInput>
+                  <small style="color:#888;display:block;margin-top:8px;">Ces photos sont stockées dans voyage_photos (sans le cover).</small>
+
+                  @if ((voyage.photos?.length || 0) > 0) {
+                    <div class="gallery-preview">
+                      <p class="gallery-title">Photos déjà liées au voyage</p>
+                      <div class="gallery-grid">
+                        @for (photo of (voyage.photos || []); track photo; let i = $index) {
+                          <div class="gallery-item">
+                            <img [src]="photo" [alt]="'Photo voyage ' + (i + 1)">
+                            <button type="button" class="btn-remove-photo" (click)="removeExistingVoyagePhoto(i)">Retirer</button>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (photosPreviews.length > 0) {
+                    <div class="gallery-preview">
+                      <p class="gallery-title">Nouvelles photos sélectionnées</p>
+                      <div class="gallery-grid">
+                        @for (preview of photosPreviews; track preview; let i = $index) {
+                          <div class="gallery-item">
+                            <img [src]="preview" [alt]="'Nouvelle photo ' + (i + 1)">
+                            <button type="button" class="btn-remove-photo" (click)="removeSelectedPhoto(i)">Supprimer</button>
+                          </div>
+                        }
+                      </div>
+                      <button type="button" class="btn-clear-photos" (click)="clearSelectedPhotos()">Vider la sélection</button>
+                    </div>
+                  }
+
                   @if (uploadingImage) {
                     <div class="upload-progress">
-                      Upload en cours...
+                      Upload des images en cours...
                     </div>
                   }
                 </div>
