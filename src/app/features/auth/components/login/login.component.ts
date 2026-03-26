@@ -1,35 +1,50 @@
 import { Component } from '@angular/core';
 
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ErrorHandlerService, ErrorMessage } from '../../../../core/services/error-handler.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
   email = '';
   password = '';
-  error = '';
+  errorMessage: ErrorMessage | null = null;
   loading = false;
 
   constructor(
     private authService: AuthService,
+    private errorHandler: ErrorHandlerService,
     private router: Router
   ) {}
 
   onSubmit(): void {
-    if (!this.email || !this.password) {
-      this.error = 'Veuillez remplir tous les champs';
+    this.errorMessage = null;
+
+    // Validation email
+    const emailError = this.errorHandler.validateEmail(this.email);
+    if (emailError) {
+      this.errorMessage = emailError;
+      return;
+    }
+
+    // Validation password
+    if (!this.password) {
+      this.errorMessage = this.errorHandler.validateForm(
+        () => !!this.password,
+        'mot de passe'
+      );
       return;
     }
 
     this.loading = true;
-    this.error = '';
 
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: () => {
@@ -41,7 +56,7 @@ export class LoginComponent {
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.message || 'Email ou mot de passe incorrect';
+        this.errorMessage = this.errorHandler.handleError(err);
       }
     });
   }

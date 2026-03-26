@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ActiviteService } from '../../../../../core/services/activite.service';
 import { ActiviteVoyageService } from '../../../../../core/services/activite-voyage.service';
 import { VoyageService } from '../../../../../core/services/voyage.service';
+import { ErrorHandlerService, ErrorMessage } from '../../../../../core/services/error-handler.service';
 import { ActiviteRequest, ActiviteVoyage, Voyage } from '../../../../../core/models/voyage.model';
 
 @Component({
   selector: 'app-activite-form',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './activite-form.component.html',
   styleUrl: './activite-form.component.scss'
 })
@@ -18,7 +20,7 @@ export class ActiviteFormComponent implements OnInit {
   isEdit = false;
   activiteId: number | null = null;
   loading = false;
-  error = '';
+  errorMessage: ErrorMessage | null = null;
   voyages: Voyage[] = [];
   obligatoire = false;
 
@@ -33,6 +35,7 @@ export class ActiviteFormComponent implements OnInit {
     private activiteService: ActiviteService,
     private activiteVoyageService: ActiviteVoyageService,
     private voyageService: VoyageService,
+    private errorHandler: ErrorHandlerService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -73,7 +76,7 @@ export class ActiviteFormComponent implements OnInit {
         this.loadPivotConfig(activite.id, activite.voyageId);
       },
       error: (err) => {
-        this.error = 'Erreur lors du chargement de l\'activité';
+        this.errorMessage = this.errorHandler.handleError(err);
         console.error(err);
       }
     });
@@ -83,7 +86,7 @@ export class ActiviteFormComponent implements OnInit {
     if (!this.validateForm()) return;
 
     this.loading = true;
-    this.error = '';
+    this.errorMessage = null;
 
     const operation = this.isEdit && this.activiteId
       ? this.activiteService.update(this.activiteId, this.activite)
@@ -95,7 +98,7 @@ export class ActiviteFormComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.message || 'Erreur lors de l\'enregistrement';
+        this.errorMessage = this.errorHandler.handleError(err);
         console.error(err);
       }
     });
@@ -146,25 +149,40 @@ export class ActiviteFormComponent implements OnInit {
               return;
             }
             this.loading = false;
-            this.error = err.error?.message || 'Erreur lors de la configuration activité/voyage';
+            this.errorMessage = this.errorHandler.handleError(err);
           }
         });
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.message || 'Erreur lors du chargement des associations activité/voyage';
+        this.errorMessage = this.errorHandler.handleError(err);
       }
     });
   }
 
   validateForm(): boolean {
-    if (!this.activite.nom || !this.activite.voyageId) {
-      this.error = 'Veuillez remplir tous les champs obligatoires';
+    this.errorMessage = null;
+
+    // Validation nom
+    let validation = this.errorHandler.validateTextLength(this.activite.nom, 3, 100, 'Nom de l\'activité');
+    if (validation) {
+      this.errorMessage = validation;
       return false;
     }
 
-    if (this.activite.prix < 0) {
-      this.error = 'Le prix ne peut pas être négatif';
+    // Validation voyage
+    if (!this.activite.voyageId) {
+      this.errorMessage = this.errorHandler.validateForm(
+        () => !!this.activite.voyageId,
+        'voyage associé'
+      );
+      return false;
+    }
+
+    // Validation prix
+    const priceError = this.errorHandler.validateAmount(this.activite.prix, 'prix de l\'activité');
+    if (priceError) {
+      this.errorMessage = priceError;
       return false;
     }
 

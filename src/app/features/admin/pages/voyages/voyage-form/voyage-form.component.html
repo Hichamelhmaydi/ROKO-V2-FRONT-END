@@ -143,9 +143,10 @@
                   }
                 </div>
 
-                @if (error) {
+                @if (errorMessage) {
                   <div class="error-message">
-                    {{ error }}
+                    <p class="error-title">{{ errorMessage.title }}</p>
+                    <p class="error-text">{{ errorMessage.message }}</p>
                   </div>
                 }
 

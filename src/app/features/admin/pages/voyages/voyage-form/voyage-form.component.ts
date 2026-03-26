@@ -1,16 +1,18 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin, map, of } from 'rxjs';
 import { VoyageService } from '../../../../../core/services/voyage.service';
 import { FileUploadService } from '../../../../../core/services/file-upload.service';
+import { ErrorHandlerService, ErrorMessage } from '../../../../../core/services/error-handler.service';
 import { VoyageRequest } from '../../../../../core/models/voyage.model';
 
 @Component({
   selector: 'app-voyage-form',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './voyage-form.component.html',
   styleUrl: './voyage-form.component.scss'
 })
@@ -21,7 +23,7 @@ export class VoyageFormComponent implements OnInit {
   isEdit = false;
   voyageId: number | null = null;
   loading = false;
-  error = '';
+  errorMessage: ErrorMessage | null = null;
   uploadingImage = false;
   imagePreview: string | null = null;
   selectedFile: File | null = null;
@@ -46,6 +48,7 @@ export class VoyageFormComponent implements OnInit {
   constructor(
     private voyageService: VoyageService,
     private fileUploadService: FileUploadService,
+    private errorHandler: ErrorHandlerService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -79,7 +82,7 @@ export class VoyageFormComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.error = 'Erreur lors du chargement du voyage';
+        this.errorMessage = this.errorHandler.handleError(err);
         console.error(err);
       }
     });
@@ -88,7 +91,17 @@ export class VoyageFormComponent implements OnInit {
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
-      this.selectedFile = input.files[0];
+      const file = input.files[0];
+
+      // Validation fichier (image)
+      const validation = this.errorHandler.validateFile(file, ['image/jpeg', 'image/png', 'image/webp'], 5);
+      if (validation) {
+        this.errorMessage = validation;
+        return;
+      }
+
+      this.selectedFile = file;
+      this.errorMessage = null;
 
       // Aperçu de l'image
       const reader = new FileReader();
@@ -105,8 +118,19 @@ export class VoyageFormComponent implements OnInit {
       return;
     }
 
+    // Validation chaque fichier
+    for (let i = 0; i < input.files.length; i++) {
+      const file = input.files[i];
+      const validation = this.errorHandler.validateFile(file, ['image/jpeg', 'image/png', 'image/webp'], 5);
+      if (validation) {
+        this.errorMessage = validation;
+        return;
+      }
+    }
+
     this.selectedPhotosFiles = Array.from(input.files);
     this.photosPreviews = [];
+    this.errorMessage = null;
 
     this.selectedPhotosFiles.forEach((file) => {
       const reader = new FileReader();
@@ -151,7 +175,7 @@ export class VoyageFormComponent implements OnInit {
     if (!this.validateForm()) return;
 
     this.loading = true;
-    this.error = '';
+    this.errorMessage = null;
     this.uploadingImage = true;
 
     const coverUpload$ = this.selectedFile
@@ -174,7 +198,7 @@ export class VoyageFormComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.uploadingImage = false;
-        this.error = 'Erreur lors de l\'upload des images';
+        this.errorMessage = this.errorHandler.handleError(err);
         console.error(err);
       }
     });
@@ -196,7 +220,7 @@ export class VoyageFormComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(err);
+        this.errorMessage = this.errorHandler.handleError(err);
         console.error(err);
       }
     });
@@ -225,39 +249,67 @@ export class VoyageFormComponent implements OnInit {
   }
 
   validateForm(): boolean {
-    if (!this.voyage.nom || !this.voyage.destination || !this.voyage.dateDepart || !this.voyage.dateRetour) {
-      this.error = 'Veuillez remplir tous les champs obligatoires';
+    this.errorMessage = null;
+
+    // Validation nom
+    let validation = this.errorHandler.validateTextLength(this.voyage.nom, 3, 100, 'Nom du voyage');
+    if (validation) {
+      this.errorMessage = validation;
+      return false;
+    }
+
+    // Validation destination
+    validation = this.errorHandler.validateTextLength(this.voyage.destination, 3, 100, 'Destination');
+    if (validation) {
+      this.errorMessage = validation;
+      return false;
+    }
+
+    // Validation dates
+    validation = this.errorHandler.validateDateRange(this.voyage.dateDepart, this.voyage.dateRetour);
+    if (validation) {
+      this.errorMessage = validation;
       return false;
     }
 
     const today = this.toLocalDate(this.todayDate);
     const dateDepart = this.toLocalDate(this.voyage.dateDepart);
-    const dateRetour = this.toLocalDate(this.voyage.dateRetour);
 
-    if (!dateDepart || !dateRetour || !today) {
-      this.error = 'Format de date invalide';
+    if (!dateDepart || !today || dateDepart < today) {
+      this.errorMessage = {
+        title: 'Date de départ invalide',
+        message: 'La date de départ doit être aujourd\'hui ou dans le futur.',
+        type: 'validation'
+      };
       return false;
     }
 
-    if (dateDepart < today) {
-      this.error = 'La date de départ doit être aujourd\'hui ou dans le futur';
+    // Validation prix
+    validation = this.errorHandler.validateAmount(this.voyage.prixBase, 'prix du voyage');
+    if (validation) {
+      this.errorMessage = validation;
       return false;
     }
 
-    if (dateRetour <= dateDepart) {
-      this.error = 'La date de retour doit être après la date de départ';
-      return false;
-    }
-
-    if (this.voyage.prixBase <= 0) {
-      this.error = 'Le prix doit être supérieur à 0';
-      return false;
-    }
-
+    // Validation cover
     const existingPhotosCount = this.voyage.photos?.length || 0;
     const newPhotosCount = this.selectedPhotosFiles.length;
+    if (!this.isEdit && !this.selectedFile && !this.voyage.cover) {
+      this.errorMessage = {
+        title: 'Image de couverture manquante',
+        message: 'Téléchargez une image de couverture pour le voyage.',
+        type: 'validation'
+      };
+      return false;
+    }
+
+    // Validation photos supplémentaires
     if (!this.isEdit && existingPhotosCount + newPhotosCount === 0) {
-      this.error = 'Ajoutez au moins une photo du voyage (lieux) en plus du cover';
+      this.errorMessage = {
+        title: 'Photos supplémentaires manquantes',
+        message: 'Ajoutez au moins une photo du voyage (lieux) en plus du cover.',
+        type: 'validation'
+      };
       return false;
     }
 

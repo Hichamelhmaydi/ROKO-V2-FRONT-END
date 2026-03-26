@@ -2,7 +2,11 @@ import { Routes } from '@angular/router';
 import { authGuard, adminGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/client/voyages', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () => import('./features/home/pages/home/home.component')
+      .then(m => m.HomeComponent)
+  },
 
   {
     path: 'login',
@@ -132,5 +136,9 @@ export const routes: Routes = [
     ]
   },
 
-  { path: '**', redirectTo: '/client/voyages' }
+  {
+    path: '**',
+    loadComponent: () => import('./features/home/pages/home/home.component')
+      .then(m => m.HomeComponent)
+  }
 ];

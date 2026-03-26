@@ -1,0 +1,63 @@
+<div class="home-page">
+  <header class="home-header">
+    <a class="brand" routerLink="/">
+      <span class="brand-name">ROKO </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navigation principale">
+      <a routerLink="/" fragment="presentation">Presentation</a>
+      <a routerLink="/" fragment="atouts">Atouts</a>
+      <a routerLink="/" fragment="contact">Contact</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="btn btn-outline" routerLink="/client/voyages">Espace Voyageur</a>
+      <a class="btn btn-solid" routerLink="/admin">Espace Admin</a>
+    </div>
+  </header>
+
+  <main class="home-main">
+    <section class="hero" id="presentation">
+      <div class="hero-copy">
+        <p class="eyebrow">Plateforme de voyage intelligente</p>
+        <h1>Planifiez, reservez et gerez vos voyages avec une experience fluide.</h1>
+        <p>
+          ROKO relie voyageurs et administrateurs dans une meme application. Les utilisateurs decouvrent
+          des offres de voyages, reservent en ligne et suivent leurs activites. L'equipe admin pilote
+          les contenus, reservations, paiements et donnees de performance.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-solid" routerLink="/client/voyages">Commencer l'exploration</a>
+          <a class="btn btn-ghost" *ngIf="!isLoggedIn" routerLink="/login">Se connecter</a>
+        </div>
+      </div>
+
+      <figure class="hero-visual" aria-label="Image de voyage">
+        <img
+          src="https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=1100&q=80"
+          alt="Voyageuse admirant un paysage de montagnes"
+          loading="eager"
+        />
+      </figure>
+    </section>
+
+    <section class="highlights" id="atouts">
+      <article class="highlight-card" *ngFor="let highlight of highlights">
+        <img [src]="highlight.imageUrl" [alt]="highlight.title" loading="lazy" />
+        <div class="highlight-content">
+          <h2>{{ highlight.title }}</h2>
+          <p>{{ highlight.text }}</p>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="home-footer" id="contact">
+    <p>ROKO Travel - Votre portail de gestion de voyages.</p>
+    <div class="footer-links">
+      <a routerLink="/register">Creer un compte</a>
+      <a routerLink="/login">Connexion</a>
+      <a routerLink="/client/voyages">Catalogue voyages</a>
+    </div>
+  </footer>
+</div>
