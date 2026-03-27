@@ -104,12 +104,21 @@ jobs:
       GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
     steps:
+      - name: Check deploy secrets
+        id: deploy_check
+        run: |
+          if [ -n "$DEPLOY_HOST" ] && [ -n "$DEPLOY_USER" ] && [ -n "$DEPLOY_SSH_KEY" ] && [ -n "$GHCR_USERNAME" ] && [ -n "$GHCR_TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Skip deploy when secrets are missing
-        if: env.DEPLOY_HOST == '' || env.DEPLOY_USER == '' || env.DEPLOY_SSH_KEY == '' || env.GHCR_USERNAME == '' || env.GHCR_TOKEN == ''
+        if: steps.deploy_check.outputs.ready != 'true'
         run: echo "Deploy skipped: required secrets are missing."
 
       - name: Deploy frontend container over SSH
-        if: env.DEPLOY_HOST != '' && env.DEPLOY_USER != '' && env.DEPLOY_SSH_KEY != '' && env.GHCR_USERNAME != '' && env.GHCR_TOKEN != ''
+        if: steps.deploy_check.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ env.DEPLOY_HOST }}
