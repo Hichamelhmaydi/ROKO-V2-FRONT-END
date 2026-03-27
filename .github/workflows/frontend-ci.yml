@@ -95,22 +95,28 @@ jobs:
     needs: docker
     if: >-
       github.event_name == 'push' &&
-      github.ref == 'refs/heads/main' &&
-      secrets.DEPLOY_HOST != '' &&
-      secrets.DEPLOY_USER != '' &&
-      secrets.DEPLOY_SSH_KEY != '' &&
-      secrets.GHCR_USERNAME != '' &&
-      secrets.GHCR_TOKEN != ''
+      github.ref == 'refs/heads/main'
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
     steps:
+      - name: Skip deploy when secrets are missing
+        if: env.DEPLOY_HOST == '' || env.DEPLOY_USER == '' || env.DEPLOY_SSH_KEY == '' || env.GHCR_USERNAME == '' || env.GHCR_TOKEN == ''
+        run: echo "Deploy skipped: required secrets are missing."
+
       - name: Deploy frontend container over SSH
+        if: env.DEPLOY_HOST != '' && env.DEPLOY_USER != '' && env.DEPLOY_SSH_KEY != '' && env.GHCR_USERNAME != '' && env.GHCR_TOKEN != ''
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          key: ${{ env.DEPLOY_SSH_KEY }}
           script: |
-            docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }}
+            docker login ghcr.io -u ${{ env.GHCR_USERNAME }} -p ${{ env.GHCR_TOKEN }}
             docker pull ghcr.io/${{ github.repository_owner }}/roko-frontend:latest
             docker rm -f roko-frontend || true
             docker run -d --name roko-frontend --restart unless-stopped -p 4200:4200 ghcr.io/${{ github.repository_owner }}/roko-frontend:latest
