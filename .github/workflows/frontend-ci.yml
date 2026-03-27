@@ -35,13 +35,16 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build -- --configuration production
+        run: npx ng build --configuration production
 
       - name: Setup Chrome for Karma
+        id: chrome
         uses: browser-actions/setup-chrome@v1
 
       - name: Run tests
-        run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
 
       - name: Upload coverage reports
         if: always()
