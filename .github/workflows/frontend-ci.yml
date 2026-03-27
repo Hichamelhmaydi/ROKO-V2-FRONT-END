@@ -41,10 +41,24 @@ jobs:
         id: chrome
         uses: browser-actions/setup-chrome@v1
 
+      - name: Detect spec files
+        id: specs
+        run: |
+          if find src -type f -name "*.spec.ts" | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run tests
+        if: steps.specs.outputs.found == 'true'
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+
+      - name: Skip tests when no spec files are present
+        if: steps.specs.outputs.found != 'true'
+        run: echo "No *.spec.ts files found. Test step skipped."
 
       - name: Upload coverage reports
         if: always()
