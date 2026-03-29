@@ -12,7 +12,7 @@
 
     <div class="header-actions">
       <a class="btn btn-outline" routerLink="/client/voyages">Espace Voyageur</a>
-      <a class="btn btn-solid" routerLink="/admin">Espace Admin</a>
+      <a class="btn btn-solid" [routerLink]="isAdmin ? '/admin' : '/login'">Espace Admin</a>
     </div>
   </header>
 

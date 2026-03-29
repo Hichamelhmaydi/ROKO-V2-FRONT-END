@@ -12,6 +12,19 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  private normalizeRole(role: unknown): string {
+    if (typeof role !== 'string') {
+      return '';
+    }
+
+    const normalized = role.trim().toUpperCase();
+    if (normalized === 'ADMIN' || normalized === 'VOYAGEUR' || normalized === 'USER') {
+      return `ROLE_${normalized}`;
+    }
+
+    return normalized;
+  }
+
   constructor(private http: HttpClient) {
     this.loadUserFromStorage();
     if (this.getToken()) {
@@ -46,9 +59,9 @@ export class AuthService {
 
     return this.http.get<Record<string, any>>(`${this.apiUrl}/me`).pipe(
       map((payload) => {
-        const role = payload['role']
+        const role = this.normalizeRole(payload['role']
           ?? payload['authorities']?.[0]?.authority
-          ?? 'USER';
+          ?? 'USER');
 
         return {
           id: payload['id'],
@@ -74,7 +87,7 @@ export class AuthService {
       email: response.email,
       nom: response.nom,
       prenom: response.prenom,
-      role: response.role as User['role']
+      role: this.normalizeRole(response.role) as User['role']
     };
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSubject.next(user);
@@ -99,12 +112,14 @@ export class AuthService {
 
   isAdmin(): boolean {
     const user = this.currentUserSubject.value;
-    return user?.role === 'ADMIN' || user?.role === 'ROLE_ADMIN';
+    const role = this.normalizeRole(user?.role);
+    return role === 'ROLE_ADMIN';
   }
 
   isVoyageur(): boolean {
     const user = this.currentUserSubject.value;
-    return user?.role === 'VOYAGEUR' || user?.role === 'ROLE_VOYAGEUR';
+    const role = this.normalizeRole(user?.role);
+    return role === 'ROLE_VOYAGEUR';
   }
 
   getCurrentUser(): User | null {

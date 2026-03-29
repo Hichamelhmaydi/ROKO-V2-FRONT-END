@@ -34,4 +34,8 @@ export class HomeComponent {
   get isLoggedIn(): boolean {
     return this.authService.isLoggedIn();
   }
+
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
 }

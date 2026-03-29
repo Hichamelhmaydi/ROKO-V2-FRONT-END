@@ -58,7 +58,6 @@ import { PopupService } from '../../../../core/services/popup.service';
                 @if (user.status !== 'ACTIVER') {
                   <button type="button" (click)="unblockUser(user)">Débloquer</button>
                 }
-                <button type="button" class="ghost" (click)="refreshUser(user)">Rafraîchir</button>
               </div>
             </article>
           }
@@ -89,7 +88,6 @@ import { PopupService } from '../../../../core/services/popup.service';
     .badge { background: #dcfce7; color: #166534; padding: 0.3rem 0.65rem; border-radius: 999px; font-weight: 700; }
     .badge-off { background: #fee2e2; color: #991b1b; }
     input, button { border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.6rem 0.85rem; background: #fff; }
-    .ghost { color: #334155; }
     .error { color: #b91c1c; }
     .pagination { display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
   `]
@@ -128,14 +126,6 @@ export class AdminUtilisateursComponent implements OnInit {
       error: (err) => {
         this.error = err.error?.message || 'Impossible de charger les voyageurs';
         this.loading = false;
-      }
-    });
-  }
-
-  refreshUser(user: User): void {
-    this.voyageurService.getById(user.id).subscribe({
-      next: (fresh) => {
-        this.voyageurs = this.voyageurs.map(item => item.id === fresh.id ? fresh : item);
       }
     });
   }
