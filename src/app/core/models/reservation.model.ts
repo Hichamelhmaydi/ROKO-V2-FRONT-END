@@ -2,9 +2,7 @@ import { Activite } from './voyage.model';
 
 export type ReservationStatus =
   | 'EN_ATTENTE'
-  | 'CONFIRMEE'
   | 'PAYEE'
-  | 'COMPLETEE'
   | 'ANNULEE'
   | string;
 

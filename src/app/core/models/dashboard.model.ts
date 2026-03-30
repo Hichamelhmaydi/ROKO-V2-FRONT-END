@@ -1,8 +1,8 @@
 export interface AdminDashboard {
   totalReservations: number;
   reservationsEnAttente: number;
-  reservationsConfirmees: number;
-  reservationsCompletees: number;
+  reservationsEnAttentePaiement: number;
+  reservationsPayees: number;
   reservationsAnnulees: number;
   totalVoyages: number;
   voyagesDisponibles: number;

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PaymentService } from '../../../../core/services/payment.service';
 import { ReservationService } from '../../../../core/services/reservation.service';
 import { Payment } from '../../../../core/models/payment.model';
@@ -10,7 +10,7 @@ import { PopupService } from '../../../../core/services/popup.service';
 @Component({
   selector: 'app-client-paiements',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
     <section class="page">
       <div class="page-header">
@@ -22,7 +22,10 @@ import { PopupService } from '../../../../core/services/popup.service';
       </div>
     
       @if (successMessage) {
-        <div class="state success">{{ successMessage }}</div>
+        <div class="state success">
+          <p>{{ successMessage }}</p>
+          <a class="home-btn" routerLink="/">Retour a l'accueil</a>
+        </div>
       }
       @if (error) {
         <div class="state error">{{ error }}</div>
@@ -91,6 +94,7 @@ import { PopupService } from '../../../../core/services/popup.service';
     .reservation-item:last-child, .payment-item:last-child { border-bottom: none; }
     .badge { background: #dbeafe; color: #1d4ed8; padding: 0.3rem 0.6rem; border-radius: 999px; font-weight: 700; }
     button { border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.6rem 0.85rem; background: #fff; }
+    .home-btn { display: inline-block; margin-top: 0.65rem; border: 1px solid #cbd5e1; border-radius: 10px; padding: 0.6rem 0.85rem; background: #fff; color: inherit; text-decoration: none; }
     .success { color: #166534; }
     .error { color: #b91c1c; }
     .pagination { margin-top: 0.8rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
@@ -127,7 +131,7 @@ export class ClientPaiementsComponent implements OnInit {
     });
     this.reservationService.getMine().subscribe({
       next: (reservations) => {
-        this.pendingReservations = reservations.filter(item => !item.paiementEffectue && item.statut !== 'ANNULEE' && item.statut !== 'COMPLETEE');
+        this.pendingReservations = reservations.filter(item => !item.paiementEffectue && item.statut !== 'ANNULEE');
         this.pendingPage = 1;
       }
     });

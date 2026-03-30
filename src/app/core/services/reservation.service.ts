@@ -55,16 +55,8 @@ export class ReservationService {
     return this.http.get<Reservation[]>(`${this.apiUrl}/recentes`);
   }
 
-  confirmer(id: number): Observable<Reservation> {
-    return this.http.put<Reservation>(`${this.apiUrl}/${id}/confirmer`, {});
-  }
-
   annuler(id: number, motif = ''): Observable<Reservation> {
     return this.http.put<Reservation>(`${this.apiUrl}/${id}/annuler`, { motif });
-  }
-
-  completer(id: number): Observable<Reservation> {
-    return this.http.put<Reservation>(`${this.apiUrl}/${id}/completer`, {});
   }
 
   update(id: number, payload: Reservation): Observable<Reservation> {

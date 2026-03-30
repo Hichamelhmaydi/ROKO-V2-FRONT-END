@@ -71,13 +71,7 @@ import { PopupService } from '../../../../core/services/popup.service';
                     <td>{{ reservation.paiementEffectue ? 'Payé' : 'En attente' }}</td>
                     <td>
                       <div class="actions">
-                        @if (reservation.statut === 'EN_ATTENTE' || reservation.statut === 'CREE') {
-                          <button type="button" (click)="confirmer(reservation)">Confirmer</button>
-                        }
-                        @if (reservation.statut === 'CONFIRMEE' || reservation.statut === 'PAYEE') {
-                          <button type="button" (click)="completer(reservation)">Compléter</button>
-                        }
-                        @if (reservation.statut !== 'ANNULEE' && reservation.statut !== 'COMPLETEE') {
+                        @if (reservation.statut !== 'ANNULEE') {
                           <button type="button" (click)="annuler(reservation)">Annuler</button>
                         }
                         <button type="button" class="danger" (click)="supprimer(reservation)">Supprimer</button>
@@ -131,7 +125,7 @@ export class AdminReservationsComponent implements OnInit {
   totalPages = 0;
   statusPage = 1;
   readonly pageSize = 10;
-  readonly statuses = ['CREE', 'EN_ATTENTE', 'EN_ATTENTE_PAIEMENT', 'CONFIRMEE', 'PAYEE', 'COMPLETEE', 'ANNULEE', 'ECHEC'];
+  readonly statuses = ['CREE', 'EN_ATTENTE', 'EN_ATTENTE_PAIEMENT', 'PAYEE', 'ANNULEE', 'ECHEC'];
   selectedStatus = '';
 
   constructor(
@@ -196,14 +190,6 @@ export class AdminReservationsComponent implements OnInit {
 
     this.page = page;
     this.loadReservations();
-  }
-
-  confirmer(reservation: Reservation): void {
-    this.reservationService.confirmer(reservation.id).subscribe({ next: () => this.loadReservations() });
-  }
-
-  completer(reservation: Reservation): void {
-    this.reservationService.completer(reservation.id).subscribe({ next: () => this.loadReservations() });
   }
 
   async annuler(reservation: Reservation): Promise<void> {

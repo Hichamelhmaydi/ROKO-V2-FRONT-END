@@ -26,25 +26,46 @@ import { AdminDashboard } from '../../../../core/models/dashboard.model';
       }
     
       @if (stats && !loading && !error) {
-        <div class="stats-grid">
-          <article class="card"><h3>Réservations totales</h3><strong>{{ stats.totalReservations }}</strong></article>
-          <article class="card"><h3>En attente</h3><strong>{{ stats.reservationsEnAttente }}</strong></article>
-          <article class="card"><h3>Confirmées</h3><strong>{{ stats.reservationsConfirmees }}</strong></article>
-          <article class="card"><h3>Complétées</h3><strong>{{ stats.reservationsCompletees }}</strong></article>
-          <article class="card"><h3>Annulées</h3><strong>{{ stats.reservationsAnnulees }}</strong></article>
-          <article class="card"><h3>Voyages</h3><strong>{{ stats.totalVoyages }}</strong></article>
-          <article class="card"><h3>Voyages disponibles</h3><strong>{{ stats.voyagesDisponibles }}</strong></article>
-          <article class="card"><h3>Voyageurs</h3><strong>{{ stats.totalVoyageurs }}</strong></article>
-          <article class="card"><h3>Voyageurs actifs</h3><strong>{{ stats.voyageursActifs }}</strong></article>
-          <article class="card"><h3>Voyageurs bloqués</h3><strong>{{ stats.voyageursBloques }}</strong></article>
-          <article class="card accent"><h3>Chiffre d'affaires</h3><strong>{{ revenueTotal | number:'1.2-2' }} MAD</strong></article>
-        </div>
+        <section class="section">
+          <h2 class="section-title">Réservations</h2>
+          <div class="stats-grid">
+            <article class="card"><h3>Total</h3><strong>{{ stats.totalReservations }}</strong></article>
+            <article class="card"><h3>En attente</h3><strong>{{ stats.reservationsEnAttente }}</strong></article>
+            <article class="card"><h3>Annulées</h3><strong>{{ stats.reservationsAnnulees }}</strong></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Voyages</h2>
+          <div class="stats-grid">
+            <article class="card"><h3>Total</h3><strong>{{ stats.totalVoyages }}</strong></article>
+            <article class="card"><h3>Disponibles</h3><strong>{{ stats.voyagesDisponibles }}</strong></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Utilisateurs</h2>
+          <div class="stats-grid">
+            <article class="card"><h3>Total</h3><strong>{{ stats.totalVoyageurs }}</strong></article>
+            <article class="card"><h3>Actifs</h3><strong>{{ stats.voyageursActifs }}</strong></article>
+            <article class="card"><h3>Bloqués</h3><strong>{{ stats.voyageursBloques }}</strong></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Revenu</h2>
+          <div class="stats-grid">
+            <article class="card accent"><h3>Chiffre d'affaires</h3><strong>{{ revenueTotal | number:'1.2-2' }} MAD</strong></article>
+          </div>
+        </section>
       }
     </section>
     `,
   styles: [`
     .page { display: grid; gap: 1rem; }
     .page-header { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .section { display: grid; gap: 0.75rem; }
+    .section-title { font-size: 1.15rem; color: #0f172a; font-weight: 700; margin: 0; padding-top: 0.5rem; }
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
     .card, .state { background: #fff; border-radius: 18px; padding: 1rem; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); }
     .card h3 { margin: 0 0 0.5rem; color: #475569; font-size: 0.95rem; }

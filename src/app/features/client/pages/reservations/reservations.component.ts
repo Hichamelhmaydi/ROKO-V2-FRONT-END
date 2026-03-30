@@ -128,7 +128,7 @@ import { PopupService } from '../../../../core/services/popup.service';
                 </div>
                 <div class="actions">
                   <a [routerLink]="['/client/paiements']" class="link-btn">Voir paiements</a>
-                  @if (reservation.statut !== 'ANNULEE' && reservation.statut !== 'COMPLETEE') {
+                  @if (reservation.statut !== 'ANNULEE') {
                     <button type="button" (click)="cancelReservation(reservation)">Annuler</button>
                   }
                 </div>

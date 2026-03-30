@@ -34,5 +34,5 @@ EXPOSE 4200
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:4200 || exit 1
 
-# Start static server
-CMD ["http-server", "/app/browser", "-p", "4200", "-a", "0.0.0.0"]
+# Start static server with SPA fallback for Angular routes
+CMD ["http-server", "/app/browser", "-p", "4200", "-a", "0.0.0.0", "-P", "http://127.0.0.1:4200?"]
