@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { ActiviteVoyageService } from '../../../../core/services/activite-voyage.service';
+import { ActiviteService } from '../../../../core/services/activite.service';
 import { ReservationService } from '../../../../core/services/reservation.service';
 import { VoyageService } from '../../../../core/services/voyage.service';
 import { Reservation, ReservationRequest } from '../../../../core/models/reservation.model';
-import { ActiviteVoyage, Voyage } from '../../../../core/models/voyage.model';
+import { Activite, Voyage } from '../../../../core/models/voyage.model';
 import { PopupService } from '../../../../core/services/popup.service';
 
 @Component({
@@ -57,7 +56,7 @@ import { PopupService } from '../../../../core/services/popup.service';
               <label class="option-item required">
                 <input type="checkbox" [checked]="true" disabled>
                 <span>
-                  <strong>{{ activite.activiteNom }}</strong>
+                  <strong>{{ activite.nom }}</strong>
                   <small>{{ getActivityPrice(activite) }} MAD</small>
                 </span>
               </label>
@@ -72,10 +71,10 @@ import { PopupService } from '../../../../core/services/popup.service';
               <label class="option-item">
                 <input
                   type="checkbox"
-                  [checked]="isSelected(activite.activiteId)"
-                  (change)="toggleActivite(activite.activiteId, $any($event.target).checked)">
+                  [checked]="isSelected(activite.id)"
+                  (change)="toggleActivite(activite.id, $any($event.target).checked)">
                   <span>
-                    <strong>{{ activite.activiteNom }}</strong>
+                    <strong>{{ activite.nom }}</strong>
                     <small>{{ getActivityPrice(activite) }} MAD</small>
                   </span>
                 </label>
@@ -169,8 +168,8 @@ import { PopupService } from '../../../../core/services/popup.service';
 export class ClientReservationsComponent implements OnInit {
   voyages: Voyage[] = [];
   reservations: Reservation[] = [];
-  activitesObligatoires: ActiviteVoyage[] = [];
-  activitesOptionnelles: ActiviteVoyage[] = [];
+  activitesObligatoires: Activite[] = [];
+  activitesOptionnelles: Activite[] = [];
   loading = true;
   error = '';
   formError = '';
@@ -187,7 +186,7 @@ export class ClientReservationsComponent implements OnInit {
   constructor(
     private reservationService: ReservationService,
     private voyageService: VoyageService,
-    private activiteVoyageService: ActiviteVoyageService,
+    private activiteService: ActiviteService,
     private route: ActivatedRoute,
     private router: Router,
     private popupService: PopupService
@@ -238,13 +237,10 @@ export class ClientReservationsComponent implements OnInit {
       return;
     }
 
-    forkJoin({
-      obligatoires: this.activiteVoyageService.getObligatoires(this.form.voyageId),
-      optionnelles: this.activiteVoyageService.getOptionnelles(this.form.voyageId)
-    }).subscribe({
-      next: ({ obligatoires, optionnelles }) => {
-        this.activitesObligatoires = obligatoires;
-        this.activitesOptionnelles = optionnelles;
+    this.activiteService.getByVoyageId(this.form.voyageId).subscribe({
+      next: (activites) => {
+        this.activitesObligatoires = [];
+        this.activitesOptionnelles = activites;
         this.form.activitesOptionnellesIds = [];
       },
       error: () => {
@@ -294,7 +290,7 @@ export class ClientReservationsComponent implements OnInit {
     });
   }
 
-  getActivityPrice(activite: ActiviteVoyage): number {
+  getActivityPrice(activite: Activite): number {
     return Number(activite.prix ?? 0);
   }
 
@@ -310,7 +306,7 @@ export class ClientReservationsComponent implements OnInit {
   getSelectedOptionalTotal(): number {
     const selectedIds = new Set(this.form.activitesOptionnellesIds || []);
     return this.activitesOptionnelles
-      .filter(a => selectedIds.has(a.activiteId))
+      .filter(a => selectedIds.has(a.id))
       .reduce((sum, a) => sum + this.getActivityPrice(a), 0);
   }
 

@@ -44,20 +44,3 @@ export interface ActiviteRequest {
   prix: number;
   voyageId: number;
 }
-
-export interface ActiviteVoyage {
-  id: number;
-  activiteId: number;
-  voyageId: number;
-  activiteNom?: string;
-  activiteDescription?: string;
-  voyageNom?: string;
-  voyageDestination?: string;
-  prix?: number;
-  obligatoire?: boolean;
-  ordreAffichage?: number;
-  jourPrevu?: string;
-  dureeMinutes?: number;
-  notes?: string;
-  disponible?: boolean;
-}

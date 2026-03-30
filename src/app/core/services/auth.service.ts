@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, map, tap } from 'rxjs';
+import { BehaviorSubject, Observable, of, map, tap, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/user.model';
 
@@ -76,6 +76,13 @@ export class AuthService {
       tap((normalized) => {
         localStorage.setItem('user', JSON.stringify(normalized));
         this.currentUserSubject.next(normalized);
+      }),
+      catchError(() => {
+        // If token is stale/invalid, clear client auth state silently.
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        this.currentUserSubject.next(null);
+        return of(null);
       })
     );
   }

@@ -4,10 +4,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ActiviteService } from '../../../../../core/services/activite.service';
-import { ActiviteVoyageService } from '../../../../../core/services/activite-voyage.service';
 import { VoyageService } from '../../../../../core/services/voyage.service';
 import { ErrorHandlerService, ErrorMessage } from '../../../../../core/services/error-handler.service';
-import { ActiviteRequest, ActiviteVoyage, Voyage } from '../../../../../core/models/voyage.model';
+import { ActiviteRequest, Voyage } from '../../../../../core/models/voyage.model';
 
 @Component({
   selector: 'app-activite-form',
@@ -22,7 +21,6 @@ export class ActiviteFormComponent implements OnInit {
   loading = false;
   errorMessage: ErrorMessage | null = null;
   voyages: Voyage[] = [];
-  obligatoire = false;
 
   activite: ActiviteRequest = {
     nom: '',
@@ -33,7 +31,6 @@ export class ActiviteFormComponent implements OnInit {
 
   constructor(
     private activiteService: ActiviteService,
-    private activiteVoyageService: ActiviteVoyageService,
     private voyageService: VoyageService,
     private errorHandler: ErrorHandlerService,
     private route: ActivatedRoute,
@@ -73,7 +70,6 @@ export class ActiviteFormComponent implements OnInit {
           prix: activite.prix,
           voyageId: activite.voyageId
         };
-        this.loadPivotConfig(activite.id, activite.voyageId);
       },
       error: (err) => {
         this.errorMessage = this.errorHandler.handleError(err);
@@ -93,69 +89,14 @@ export class ActiviteFormComponent implements OnInit {
       : this.activiteService.create(this.activite);
 
     operation.subscribe({
-      next: (saved) => {
-        this.syncPivotConfig(saved.id, this.activite.voyageId);
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/admin/activites']);
       },
       error: (err) => {
         this.loading = false;
         this.errorMessage = this.errorHandler.handleError(err);
         console.error(err);
-      }
-    });
-  }
-
-  private loadPivotConfig(activiteId: number, voyageId: number): void {
-    this.activiteVoyageService.getByActivite(activiteId).subscribe({
-      next: (associations) => {
-        const association = associations.find(a => a.voyageId === voyageId);
-        this.obligatoire = !!association?.obligatoire;
-      },
-      error: () => {
-        this.obligatoire = false;
-      }
-    });
-  }
-
-  private syncPivotConfig(activiteId: number, voyageId: number): void {
-    const normalizedVoyageId = Number(voyageId);
-
-    this.activiteVoyageService.getByActivite(activiteId).subscribe({
-      next: (associations) => {
-        const association = associations.find(a => Number(a.voyageId) === normalizedVoyageId);
-
-        const payload: ActiviteVoyage = {
-          id: association?.id ?? 0,
-          activiteId,
-          voyageId: normalizedVoyageId,
-          prix: this.activite.prix,
-          obligatoire: this.obligatoire,
-          disponible: true
-        };
-
-        const request$ = association?.id
-          ? this.activiteVoyageService.update(association.id, payload)
-          : this.activiteVoyageService.create(payload);
-
-        request$.subscribe({
-          next: () => {
-            this.loading = false;
-            this.router.navigate(['/admin/activites']);
-          },
-          error: (err) => {
-            const message = (err?.error?.message || '').toString().toLowerCase();
-            if (message.includes('deja associee') || message.includes('déjà associée')) {
-              this.loading = false;
-              this.router.navigate(['/admin/activites']);
-              return;
-            }
-            this.loading = false;
-            this.errorMessage = this.errorHandler.handleError(err);
-          }
-        });
-      },
-      error: (err) => {
-        this.loading = false;
-        this.errorMessage = this.errorHandler.handleError(err);
       }
     });
   }

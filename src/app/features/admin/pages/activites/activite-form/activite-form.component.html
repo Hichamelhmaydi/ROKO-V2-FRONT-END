@@ -33,55 +33,44 @@
         name="nom"
         placeholder="Ex: Visite des souks"
         required>
-      </div>
-
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea
-          id="description"
-          [(ngModel)]="activite.description"
-          name="description"
-          rows="4"
-        placeholder="Décrivez l'activité..."></textarea>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="prix">Prix (MAD) *</label>
-          <input
-            type="number"
-            id="prix"
-            [(ngModel)]="activite.prix"
-            name="prix"
-            min="0"
-            step="0.01"
-            required>
-          </div>
-          <div class="form-group">
-            <label for="obligatoire">Type d'activité *</label>
-            <select
-              id="obligatoire"
-              [(ngModel)]="obligatoire"
-              name="obligatoire"
-              required>
-              <option [ngValue]="false">Optionnelle</option>
-              <option [ngValue]="true">Obligatoire</option>
-            </select>
-          </div>
-        </div>
-
-        @if (errorMessage) {
-          <div class="error-message">
-            <p class="error-title">{{ errorMessage.title }}</p>
-            <p class="error-text">{{ errorMessage.message }}</p>
-          </div>
-        }
-
-        <div class="form-actions">
-          <a routerLink="/admin/activites" class="btn-cancel">Annuler</a>
-          <button type="submit" [disabled]="loading" class="btn-submit">
-            {{ loading ? 'Enregistrement...' : (isEdit ? 'Modifier' : 'Créer') }}
-          </button>
-        </div>
-      </form>
     </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        [(ngModel)]="activite.description"
+        name="description"
+        rows="4"
+        placeholder="Décrivez l'activité..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="prix">Prix (MAD) *</label>
+        <input
+          type="number"
+          id="prix"
+          [(ngModel)]="activite.prix"
+          name="prix"
+          min="0"
+          step="0.01"
+          required>
+      </div>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-message">
+        <p class="error-title">{{ errorMessage.title }}</p>
+        <p class="error-text">{{ errorMessage.message }}</p>
+      </div>
+    }
+
+    <div class="form-actions">
+      <a routerLink="/admin/activites" class="btn-cancel">Annuler</a>
+      <button type="submit" [disabled]="loading" class="btn-submit">
+        {{ loading ? 'Enregistrement...' : (isEdit ? 'Modifier' : 'Créer') }}
+      </button>
+    </div>
+  </form>
+</div>

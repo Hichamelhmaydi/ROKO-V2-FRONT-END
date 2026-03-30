@@ -42,3 +42,15 @@ export const voyageurGuard: CanActivateFn = () => {
   router.navigate(['/']);
   return false;
 };
+
+export const guestOnlyGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isLoggedIn()) {
+    return true;
+  }
+
+  router.navigate([authService.isAdmin() ? '/admin' : '/client']);
+  return false;
+};
