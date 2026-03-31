@@ -32,6 +32,7 @@ export interface Activite {
   nom: string;
   description: string;
   prix: number;
+  obligatoire?: boolean;
   voyageId: number;
   voyageNom?: string;
   nombreReservations?: number;
@@ -42,5 +43,6 @@ export interface ActiviteRequest {
   nom: string;
   description: string;
   prix: number;
+  obligatoire?: boolean;
   voyageId: number;
 }

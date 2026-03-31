@@ -21,11 +21,13 @@ export class ActiviteFormComponent implements OnInit {
   loading = false;
   errorMessage: ErrorMessage | null = null;
   voyages: Voyage[] = [];
+  obligatoire = false;
 
   activite: ActiviteRequest = {
     nom: '',
     description: '',
     prix: 0,
+    obligatoire: false,
     voyageId: 0
   };
 
@@ -68,8 +70,10 @@ export class ActiviteFormComponent implements OnInit {
           nom: activite.nom,
           description: activite.description,
           prix: activite.prix,
+          obligatoire: !!activite.obligatoire,
           voyageId: activite.voyageId
         };
+        this.obligatoire = !!activite.obligatoire;
       },
       error: (err) => {
         this.errorMessage = this.errorHandler.handleError(err);
@@ -83,6 +87,8 @@ export class ActiviteFormComponent implements OnInit {
 
     this.loading = true;
     this.errorMessage = null;
+
+    this.activite.obligatoire = this.obligatoire;
 
     const operation = this.isEdit && this.activiteId
       ? this.activiteService.update(this.activiteId, this.activite)

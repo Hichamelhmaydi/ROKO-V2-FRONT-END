@@ -57,6 +57,17 @@
           step="0.01"
           required>
       </div>
+      <div class="form-group">
+        <label for="obligatoire">Type d'activité *</label>
+        <select
+          id="obligatoire"
+          [(ngModel)]="obligatoire"
+          name="obligatoire"
+          required>
+          <option [ngValue]="false">Optionnelle</option>
+          <option [ngValue]="true">Obligatoire</option>
+        </select>
+      </div>
     </div>
 
     @if (errorMessage) {

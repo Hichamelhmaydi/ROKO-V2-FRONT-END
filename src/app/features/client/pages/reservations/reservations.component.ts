@@ -239,8 +239,8 @@ export class ClientReservationsComponent implements OnInit {
 
     this.activiteService.getByVoyageId(this.form.voyageId).subscribe({
       next: (activites) => {
-        this.activitesObligatoires = [];
-        this.activitesOptionnelles = activites;
+        this.activitesObligatoires = activites.filter(a => !!a.obligatoire);
+        this.activitesOptionnelles = activites.filter(a => !a.obligatoire);
         this.form.activitesOptionnellesIds = [];
       },
       error: () => {
